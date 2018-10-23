@@ -31,36 +31,4 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function account()
-    {
-        return $this->belongsTo(Account::class);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function gender()
-    {
-        return $this->belongsTo(Gender::class);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function passedTests()
-    {
-        return $this->hasMany(PassedTest::class);
-    }
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function history()
-    {
-        return $this->hasMany(Logger::class);
-    }
 }
