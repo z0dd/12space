@@ -2,13 +2,11 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Class FileTypes
  * @package App
  */
-class FileTypes extends Model implements ApiModelInterface
+class FileTypes extends ModelExtender
 {
     /**
      * @var array

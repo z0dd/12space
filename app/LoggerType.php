@@ -2,13 +2,11 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Class LoggerType
  * @package App
  */
-class LoggerType extends Model implements ApiModelInterface
+class LoggerType extends ModelExtender
 {
     /**
      * @var array

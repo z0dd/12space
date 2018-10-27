@@ -2,13 +2,11 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Class Template
  * @package App
  */
-class Template extends Model implements ApiModelInterface
+class Template extends ModelExtender
 {
     /**
      * @var array

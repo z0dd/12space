@@ -2,13 +2,11 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Class Course
  * @package App
  */
-class Course extends Model implements ApiModelInterface
+class Course extends ModelExtender
 {
     protected $fillable = [
         'name',

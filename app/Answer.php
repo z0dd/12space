@@ -2,13 +2,15 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Class Answer
  * @package App
  */
-class Answer extends Model implements ApiModelInterface
+/**
+ * Class Answer
+ * @package App
+ */
+class Answer extends ModelExtender
 {
     /**
      * @var array
@@ -18,6 +20,11 @@ class Answer extends Model implements ApiModelInterface
         'text',
         'sort_order',
     ];
+
+    /**
+     * @var array
+     */
+    protected $presentRelations = ['question'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

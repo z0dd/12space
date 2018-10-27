@@ -2,13 +2,11 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Class Gender
  * @package App
  */
-class Gender extends Model implements ApiModelInterface
+class Gender extends ModelExtender
 {
     /**
      * @var array

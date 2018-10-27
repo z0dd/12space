@@ -2,13 +2,11 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Class Logger
  * @package App
  */
-class Logger extends Model
+class Logger extends ModelExtender
 {
     /**
      * @var array

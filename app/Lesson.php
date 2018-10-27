@@ -2,13 +2,11 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
 /**
  * Class Lesson
  * @package App
  */
-class Lesson extends Model implements ApiModelInterface
+class Lesson extends ModelExtender
 {
     /**
      * @var array
