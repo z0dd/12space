@@ -10,7 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * Class User
  * @package App
  */
-class User extends Authenticatable implements ApiModelInterface
+class User extends \TCG\Voyager\Models\User implements ApiModelInterface
 {
     use Notifiable;
 
