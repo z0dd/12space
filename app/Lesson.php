@@ -8,8 +8,22 @@ use Illuminate\Database\Eloquent\Model;
  * Class Lesson
  * @package App
  */
-class Lesson extends Model
+class Lesson extends Model implements ApiModelInterface
 {
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'type_id',
+        'name',
+        'description',
+        'gender_id',
+        'template_id',
+        'published_at',
+        'status',
+        'sort_order',
+        'text',
+    ];
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -56,5 +70,23 @@ class Lesson extends Model
     public function contents()
     {
         return $this->hasMany(LessonContent::class);
+    }
+
+    /**
+     * @return array
+     */
+    public function rules() :array
+    {
+        return [
+            'type_id' => 'required|integer|min:1',
+            'name' => 'required|string|min:3|max:250',
+            'description' => 'string|min:3|max:250',
+            'gender_id' => 'required|integer|min:1',
+            'template_id' => 'required|integer|min:1',
+            'published_at' => 'date',
+            'status' => 'integer|min:1',
+            'sort_order' => 'integer|min:1',
+            'text' => 'required|string',
+        ];
     }
 }

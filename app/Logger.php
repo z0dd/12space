@@ -11,6 +11,16 @@ use Illuminate\Database\Eloquent\Model;
 class Logger extends Model
 {
     /**
+     * @var array
+     */
+    protected $fillable = [
+        'user_id',
+        'status',
+        'log_type_id',
+        'message',
+    ];
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user()
@@ -24,5 +34,18 @@ class Logger extends Model
     public function type()
     {
         return $this->belongsTo(LoggerType::class);
+    }
+
+    /**
+     * @return array
+     */
+    public function rules() :array
+    {
+        return [
+            'user_id' => 'required|integer|min:1',
+            'status' => 'integer|min:1',
+            'log_type_id' => 'required|integer|min:1',
+            'message' => 'required|string|min:1|max:250',
+        ];
     }
 }

@@ -8,8 +8,17 @@ use Illuminate\Database\Eloquent\Model;
  * Class Question
  * @package App
  */
-class Question extends Model
+class Question extends Model implements ApiModelInterface
 {
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'test_id',
+        'text',
+        'required',
+        'sort_order',
+    ];
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -32,5 +41,18 @@ class Question extends Model
     public function passedTests()
     {
         return $this->hasMany(PassedTest::class);
+    }
+
+    /**
+     * @return array
+     */
+    public function rules() :array
+    {
+        return [
+            'test_id' => 'required|integer|min:1',
+            'text' => 'required|string|min:1',
+            'required' => 'boolean',
+            'sort_order' => 'integer',
+        ];
     }
 }

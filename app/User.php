@@ -10,7 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * Class User
  * @package App
  */
-class User extends Authenticatable
+class User extends Authenticatable implements ApiModelInterface
 {
     use Notifiable;
 
@@ -62,5 +62,21 @@ class User extends Authenticatable
     public function history()
     {
         return $this->hasMany(Logger::class);
+    }
+
+    /**
+     * @return array
+     */
+    public function rules() :array
+    {
+        return [
+            'name' => 'required|string|min:3|max:250',
+            'last_name' => 'required|string|min:3|max:250',
+            'email' => 'required|email|min:3|max:250',
+            'password' => 'confirmed',
+            'phone' => 'required|regex:/^((7)+([0-9]){10})$/i',
+            'gender_id' => 'required|integer|min:1',
+            'account_id' =>  'required|integer|min:1',
+        ];
     }
 }

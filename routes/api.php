@@ -13,6 +13,14 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::get('accounts', 'Api\AccountController@show')->name('getAccounts');
+Route::get('accounts/{id}', 'Api\AccountController@get')->name('getAccount');
+Route::post('accounts/{id}', 'Api\AccountController@set')->name('setAccount');
+Route::post('accounts', 'Api\AccountController@create')->name('createAccount');
+
+Route::get('answers', 'Api\AnswerController@show')->name('getAnswers');
+Route::get('answers/{id}', 'Api\AnswerController@get')->name('getAnswer');
+Route::post('answers/{id}', 'Api\AnswerController@set')->name('setAnswer');
+Route::post('answers', 'Api\AnswerController@create')->name('createAnswer');
+
+

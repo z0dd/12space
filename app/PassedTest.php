@@ -8,8 +8,18 @@ use Illuminate\Database\Eloquent\Model;
  * Class PassedTest
  * @package App
  */
-class PassedTest extends Model
+class PassedTest extends Model implements ApiModelInterface
 {
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'user_id',
+        'test_id',
+        'question_id',
+        'answer_id',
+    ];
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -40,5 +50,18 @@ class PassedTest extends Model
     public function test()
     {
         return $this->belongsTo(Test::class);
+    }
+
+    /**
+     * @return array
+     */
+    public function rules() :array
+    {
+        return [
+            'user_id' => 'required|integer|min:1',
+            'test_id' => 'required|integer|min:1',
+            'question_id' => 'required|integer|min:1',
+            'answer_id' => 'required|integer|min:1',
+        ];
     }
 }

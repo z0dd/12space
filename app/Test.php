@@ -8,8 +8,16 @@ use Illuminate\Database\Eloquent\Model;
  * Class Test
  * @package App
  */
-class Test extends Model
+class Test extends Model implements ApiModelInterface
 {
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'lesson_id',
+        'sort_order'
+    ];
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -40,5 +48,17 @@ class Test extends Model
     public function answers()
     {
         return $this->hasManyThrough(Answer::class, Question::class);
+    }
+
+    /**
+     * @return array
+     */
+    public function rules() :array
+    {
+        return [
+            'name' => 'required|string|min:3|max:250',
+            'lesson_id' => 'required|integer|min:1',
+            'sort_order' => 'integer',
+        ];
     }
 }
