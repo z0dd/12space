@@ -21,11 +21,11 @@ class ApiException extends Exception
      * Render the exception into an HTTP response.
      *
      * @param $request
-     * @param Exception $exception
      * @return mixed
      */
-    public function render($request, Exception $exception)
+    public function render($request)
     {
-        return parent::render($request, $exception);
+        dd($this->getMessage());
+//        return parent::render($request, $exception);
     }
 }

@@ -41,4 +41,13 @@ abstract class ModelExtender extends Model implements ApiModelInterface
     {
         return $this->presentRelations;
     }
+
+    /**
+     * @param $query
+     * @return mixed
+     */
+    public function scopeWithDefaultRelations($query)
+    {
+        return $query;
+    }
 }

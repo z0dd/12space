@@ -87,4 +87,13 @@ class Lesson extends ModelExtender
             'text' => 'required|string',
         ];
     }
+
+    /**
+     * @param $query
+     * @return mixed
+     */
+    public function scopeWithDefaultRelations($query)
+    {
+        return $query->with(['tests','contents']);
+    }
 }

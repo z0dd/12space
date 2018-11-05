@@ -30,7 +30,7 @@ class Module extends ModelExtender
      */
     public function lessons()
     {
-        return $this->hasManyThrough(Lesson::class,ModulesToLessons::class);
+        return $this->hasManyThrough(Lesson::class,ModulesToLessons::class, 'module_id', 'id', 'id', 'lesson_id');
     }
 
     /**
@@ -43,5 +43,14 @@ class Module extends ModelExtender
             'name' => 'required|string|min:3|max:250',
             'sort_order' => 'integer|min:1'
         ];
+    }
+
+    /**
+     * @param $query
+     * @return mixed
+     */
+    public function scopeWithDefaultRelations($query)
+    {
+        return $query->with(['lessons']);
     }
 }

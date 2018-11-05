@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Answer;
+use App\Exceptions\ApiException;
+use App\PassedTest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 

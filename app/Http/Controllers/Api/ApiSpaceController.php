@@ -39,7 +39,7 @@ abstract class ApiSpaceController extends Controller
      */
     public function get(\Illuminate\Http\Request $request, int $id)
     {
-        return $this->model->findOrFail($id);
+        return $this->model->withDefaultRelations()->findOrFail($id);
     }
 
     /**

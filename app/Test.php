@@ -59,4 +59,13 @@ class Test extends ModelExtender
             'sort_order' => 'integer',
         ];
     }
+
+    /**
+     * @param $query
+     * @return mixed
+     */
+    public function scopeWithDefaultRelations($query)
+    {
+        return $query->with(['questions']);
+    }
 }

@@ -6,8 +6,15 @@ namespace App;
  * Class Course
  * @package App
  */
+/**
+ * Class Course
+ * @package App
+ */
 class Course extends ModelExtender
 {
+    /**
+     * @var array
+     */
     protected $fillable = [
         'name',
         'price',
@@ -30,6 +37,9 @@ class Course extends ModelExtender
         return $this->belongsTo(CourseStatus::class);
     }
 
+    /**
+     * @return array
+     */
     public function rules() :array
     {
         return [
@@ -37,5 +47,14 @@ class Course extends ModelExtender
             'price' => 'required|digits_between:0,2|min:0|',
             'status_id' => 'required|min:1|integer',
         ];
+    }
+
+    /**
+     * @param $query
+     * @return mixed
+     */
+    public function scopeWithDefaultRelations($query)
+    {
+        return $query->with(['modules']);
     }
 }
