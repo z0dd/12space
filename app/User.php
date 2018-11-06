@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Exceptions\ApiException;
+use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -78,5 +80,46 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
             'gender_id' => 'required|integer|min:1',
             'account_id' =>  'required|integer|min:1',
         ];
+    }
+
+    /**
+     * @return mixed
+     * @throws ApiException
+     */
+    public function currentLesson()
+    {
+        $lastPassedTest = PassedTest::where('user_id', $this->id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (false == $lastPassedTest) {
+            // Возвращаем первый урок
+            return Lesson::withDefaultRelations()->first();
+        }
+
+        $answer =& $lastPassedTest->answer;
+
+        if ($answer->created_at->diffInDays(Carbon::now()) < config('settings.days_between_lessons')) {
+            throw new ApiException('Доступ к следующему уроку пока закрыт',400);
+        }
+
+        if ($answer->tags->isEmpty() || true) {
+            // Если нет связи по тегам
+            $nextLesson = $lastPassedTest->test->lesson->getNextLesson();
+
+            if (empty($nextLesson)) {
+                throw new ApiException('Все уроки пройдены');
+            }
+
+            return $nextLesson;
+        }
+
+        $tag = $lastPassedTest->answer->tags->first();
+
+        if ($tag->lessons->isEmpty()) {
+            throw new ApiException('Нет связанных уроков');
+        }
+
+        return $tag->lessons->first();
     }
 }

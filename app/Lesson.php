@@ -35,7 +35,14 @@ class Lesson extends ModelExtender
      */
     public function modules()
     {
-        return $this->hasManyThrough(Module::class, ModulesToLessons::class);
+        return $this->hasManyThrough(
+            Module::class,
+            ModulesToLessons::class,
+            'lesson_id',
+            'id',
+            'id',
+            'module_id'
+        );
     }
 
     /**
@@ -95,5 +102,17 @@ class Lesson extends ModelExtender
     public function scopeWithDefaultRelations($query)
     {
         return $query->with(['tests','contents']);
+    }
+
+    public function getNextLesson()
+    {
+        $module = $this->modules->first();
+
+        return $module
+            ->lessons
+            ->where('sort_order','>=',$this->sort_order)
+            ->where('id', '!=', $this->id)
+            ->sortBy('sort_order')
+            ->first();
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Answer;
 use App\Exceptions\ApiException;
 use App\PassedTest;
+use App\Question;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -52,5 +53,12 @@ class UserController extends ApiSpaceController
         }
 
         return $passedTest->fresh(['question','answer','test']);
+    }
+
+    public function getCurrentLesson(\Illuminate\Http\Request $request, int $user_id)
+    {
+        $user = User::findOrFail($user_id);
+
+        return $user->currentLesson();
     }
 }

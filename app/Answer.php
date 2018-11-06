@@ -53,4 +53,19 @@ class Answer extends ModelExtender
             'sort_order' => 'integer|min:1|max:1000',
         ];
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function tags()
+    {
+        return $this->hasManyThrough(
+            Tag::class,
+            TagToAnswer::class,
+            'answer_id',
+            'id',
+            'id',
+            'tag_id'
+        );
+    }
 }

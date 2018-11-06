@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Test;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 /**
  * Class TestController
