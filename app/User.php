@@ -103,7 +103,7 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
             throw new ApiException('Доступ к следующему уроку пока закрыт',400);
         }
 
-        if ($answer->tags->isEmpty() || true) {
+        if ($answer->tags->isEmpty()) {
             // Если нет связи по тегам
             $nextLesson = $lastPassedTest->test->lesson->getNextLesson();
 
