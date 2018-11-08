@@ -5,10 +5,23 @@ namespace App;
 /**
  * Class Course
  * @package App
- */
-/**
- * Class Course
- * @package App
+ *
+ * @OA\Schema(
+ *   schema="Course",
+ *   type="object",
+ *   allOf={
+ *      @OA\Schema(ref="#/components/schemas/Course"),
+ *      @OA\Schema(
+ *          required={"name", "price", "status_id"},
+ *          @OA\Property(property="id", type="integer"),
+ *          @OA\Property(property="name", type="string"),
+ *          @OA\Property(property="price", format="double", type="number"),
+ *          @OA\Property(property="status_id", type="integer"),
+ *          @OA\Property(property="created_at", format="timestamp", type="string"),
+ *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *      )
+ *   }
+ * )
  */
 class Course extends ModelExtender
 {

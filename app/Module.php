@@ -5,6 +5,23 @@ namespace App;
 /**
  * Class Module
  * @package App
+ *
+ * @OA\Schema(
+ *   schema="Module",
+ *   type="object",
+ *   allOf={
+ *      @OA\Schema(ref="#/components/schemas/Module"),
+ *      @OA\Schema(
+ *          required={"name","course_id"},
+ *          @OA\Property(property="id", type="integer"),
+ *          @OA\Property(property="course_id", type="integer"),
+ *          @OA\Property(property="name", type="string"),
+ *          @OA\Property(property="sort_order", type="integer"),
+ *          @OA\Property(property="created_at", format="timestamp", type="string"),
+ *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *      )
+ *   }
+ * )
  */
 class Module extends ModelExtender
 {

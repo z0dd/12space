@@ -5,6 +5,24 @@ namespace App;
 /**
  * Class PassedTest
  * @package App
+ *
+ * @OA\Schema(
+ *   schema="PassedTest",
+ *   type="object",
+ *   allOf={
+ *      @OA\Schema(ref="#/components/schemas/PassedTest"),
+ *      @OA\Schema(
+ *          required={"name"},
+ *          @OA\Property(property="id", type="integer"),
+ *          @OA\Property(property="user_id", type="integer"),
+ *          @OA\Property(property="test_id", type="integer"),
+ *          @OA\Property(property="question_id", type="integer"),
+ *          @OA\Property(property="answer_id", type="integer"),
+ *          @OA\Property(property="created_at", format="timestamp", type="string"),
+ *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *      )
+ *   }
+ * )
  */
 class PassedTest extends ModelExtender
 {

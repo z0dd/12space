@@ -13,6 +13,97 @@ use App\Http\Controllers\Controller;
 /**
  * Class UserController
  * @package App\Http\Controllers\Api
+ *
+ * @OA\Tag(name="Users")
+ * @OA\Get(
+ *      path="/users",
+ *      tags={"Users"},
+ *      description="Get list of all models without any definitions",
+ *      @OA\Response(
+ *          response=200,
+ *          description="successful operation",
+ *          @OA\JsonContent(
+ *             type="array",
+ *             @OA\Items(ref="#/components/schemas/User")
+ *         ),
+ *       ),
+ * )
+ * @OA\Get(
+ *      path="/users/{id}",
+ *      tags={"Users"},
+ *      description="Returns model with all default definitions",
+ *      @OA\Parameter(
+ *          description="ID of model",
+ *          in="path",
+ *          name="id",
+ *          required=true,
+ *          @OA\Schema(
+ *              type="integer",
+ *              format="int64",
+ *         )
+ *      ),
+ *      @OA\Response(
+ *          response=200,
+ *          description="successful operation",
+ *          @OA\JsonContent(ref="#/components/schemas/User")
+ *       ),
+ *      @OA\Response(response=404, description="Not found"),
+ * )
+ * @OA\Post(
+ *     path="users/{user_id}/answers/{answer_id}",
+ *     tags={"Users"},
+ *     description="Save user answer",
+ *      @OA\Parameter(
+ *          description="ID of user model",
+ *          in="path",
+ *          name="user_id",
+ *          required=true,
+ *          @OA\Schema(
+ *              type="integer",
+ *              format="int64",
+ *         )
+ *      ),
+ *      @OA\Parameter(
+ *          description="ID of answer model",
+ *          in="path",
+ *          name="answer_id",
+ *          required=true,
+ *          @OA\Schema(
+ *              type="integer",
+ *              format="int64",
+ *         )
+ *      ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="successful operation",
+ *          @OA\JsonContent(ref="#/components/schemas/PassedTest")
+ *      ),
+ *     @OA\Response(response=404, description="Answer or user not found"),
+ *     @OA\Response(response=400, description="Already answered"),
+ *     @OA\Response(response=500, description="Error while saving answer"),
+ * )
+ * @OA\Get(
+ *      path="/users/{user_id}/lessons/current",
+ *      tags={"Users"},
+ *      description="Return current question for user",
+ *      @OA\Parameter(
+ *          description="ID of user model",
+ *          in="path",
+ *          name="user_id",
+ *          required=true,
+ *          @OA\Schema(
+ *              type="integer",
+ *              format="int64",
+ *         )
+ *      ),
+ *      @OA\Response(
+ *          response=200,
+ *          description="successful operation",
+ *          @OA\JsonContent(ref="#/components/schemas/Lesson")
+ *       ),
+ *      @OA\Response(response=404, description="Not found"),
+ * )
+ *
  */
 class UserController extends ApiSpaceController
 {

@@ -50,6 +50,3 @@ Route::get('users', 'Api\UserController@show');
 Route::get('users/{id}', 'Api\UserController@get');
 Route::post('users/{user_id}/answers/{answer_id}', 'Api\UserController@saveAnswer');
 Route::get('users/{user_id}/lessons/current', 'Api\UserController@getCurrentLesson');
-
-//Route::get('tags', 'Api\TagController@show');
-//Route::get('tags/{id}', 'Api\TagController@get');

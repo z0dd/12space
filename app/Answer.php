@@ -5,10 +5,23 @@ namespace App;
 /**
  * Class Answer
  * @package App
- */
-/**
- * Class Answer
- * @package App
+ *
+ * @OA\Schema(
+ *   schema="Answer",
+ *   type="object",
+ *   allOf={
+ *      @OA\Schema(ref="#/components/schemas/Answer"),
+ *      @OA\Schema(
+ *          required={"question_id", "text"},
+ *          @OA\Property(property="id", type="integer"),
+ *          @OA\Property(property="question_id", type="integer"),
+ *          @OA\Property(property="text", type="string"),
+ *          @OA\Property(property="sort_order", type="integer"),
+ *          @OA\Property(property="created_at", format="timestamp", type="string"),
+ *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *      )
+ *   }
+ * )
  */
 class Answer extends ModelExtender
 {
@@ -67,5 +80,14 @@ class Answer extends ModelExtender
             'id',
             'tag_id'
         );
+    }
+
+    /**
+     * @param $query
+     * @return mixed
+     */
+    public function scopeWithDefaultRelations($query)
+    {
+        return $query->with(['question']);
     }
 }

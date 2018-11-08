@@ -5,6 +5,26 @@ namespace App;
 /**
  * Class LessonContent
  * @package App
+ *
+ * @OA\Schema(
+ *   schema="LessonContent",
+ *   type="object",
+ *   allOf={
+ *      @OA\Schema(ref="#/components/schemas/LessonContent"),
+ *      @OA\Schema(
+ *          required={"lesson_id","name","mime","file_type_id","gender_id"},
+ *          @OA\Property(property="id", type="integer"),
+ *          @OA\Property(property="lesson_id", type="integer"),
+ *          @OA\Property(property="name", type="string"),
+ *          @OA\Property(property="file", format="binary", type="string"),
+ *          @OA\Property(property="mime", type="string"),
+ *          @OA\Property(property="file_type_id", type="integer"),
+ *          @OA\Property(property="gender_id", type="integer"),
+ *          @OA\Property(property="created_at", format="timestamp", type="string"),
+ *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *      )
+ *   }
+ * )
  */
 class LessonContent extends ModelExtender
 {

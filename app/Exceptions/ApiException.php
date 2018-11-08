@@ -5,6 +5,10 @@ namespace App\Exceptions;
 use Exception;
 use Log;
 
+/**
+ * Class ApiException
+ * @package App\Exceptions
+ */
 class ApiException extends Exception
 {
     /**

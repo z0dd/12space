@@ -13,6 +13,21 @@ use App\Exceptions\ApiException;
 use App\Http\Controllers\Controller;
 
 /**
+ * @OA\OpenApi(
+ *     @OA\Server(
+ *         url="L5_SWAGGER_CONST_HOST",
+ *         description="API server"
+ *     ),
+ *     @OA\Info(
+ *          version="1.0.0",
+ *          title="12space",
+ *          description="Swagger описание API для 12space",
+ *          @OA\Contact(
+ *              email="z0dd@mail.ru"
+ *          )
+ *     ),
+ * )
+ *
  * Class ApiSpaceController
  * @package App\Http\Controllers\Api
  */

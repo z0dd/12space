@@ -5,6 +5,29 @@ namespace App;
 /**
  * Class Lesson
  * @package App
+ *
+ * @OA\Schema(
+ *   schema="Lesson",
+ *   type="object",
+ *   allOf={
+ *      @OA\Schema(ref="#/components/schemas/Lesson"),
+ *      @OA\Schema(
+ *          required={"type_id","name","gender_id","template_id","text"},
+ *          @OA\Property(property="id", type="integer"),
+ *          @OA\Property(property="type_id", type="integer"),
+ *          @OA\Property(property="name", type="string"),
+ *          @OA\Property(property="description", type="string"),
+ *          @OA\Property(property="text", type="string"),
+ *          @OA\Property(property="gender_id", type="integer"),
+ *          @OA\Property(property="template_id", type="integer"),
+ *          @OA\Property(property="status", type="integer"),
+ *          @OA\Property(property="sort_order", type="integer"),
+ *          @OA\Property(property="published_at", type="string"),
+ *          @OA\Property(property="created_at", format="timestamp", type="string"),
+ *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *      )
+ *   }
+ * )
  */
 class Lesson extends ModelExtender
 {

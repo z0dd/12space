@@ -5,6 +5,23 @@ namespace App;
 /**
  * Class Test
  * @package App
+ *
+ * @OA\Schema(
+ *   schema="Test",
+ *   type="object",
+ *   allOf={
+ *      @OA\Schema(ref="#/components/schemas/Test"),
+ *      @OA\Schema(
+ *          required={"name","lesson_id"},
+ *          @OA\Property(property="id", type="integer"),
+ *          @OA\Property(property="lesson_id", type="integer"),
+ *          @OA\Property(property="sort_order", type="integer"),
+ *          @OA\Property(property="name", type="string"),
+ *          @OA\Property(property="created_at", format="timestamp", type="string"),
+ *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *      )
+ *   }
+ * )
  */
 class Test extends ModelExtender
 {

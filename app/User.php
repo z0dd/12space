@@ -11,6 +11,27 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 /**
  * Class User
  * @package App
+ *
+ * @OA\Schema(
+ *   schema="User",
+ *   type="object",
+ *   allOf={
+ *      @OA\Schema(ref="#/components/schemas/User"),
+ *      @OA\Schema(
+ *          required={"name","last_name", "email", "phone", "gender_id","account_id"},
+ *          @OA\Property(property="id", type="integer"),
+ *          @OA\Property(property="name", type="string"),
+ *          @OA\Property(property="last_name", type="string"),
+ *          @OA\Property(property="email", format="email", type="string"),
+ *          @OA\Property(property="password", type="password", writeOnly="true"),
+ *          @OA\Property(property="phone", type="string"),
+ *          @OA\Property(property="gender_id", type="integer"),
+ *          @OA\Property(property="account_id", type="integer"),
+ *          @OA\Property(property="created_at", format="timestamp", type="string"),
+ *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *      )
+ *   }
+ * )
  */
 class User extends \TCG\Voyager\Models\User implements ApiModelInterface
 {
@@ -121,5 +142,14 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
         }
 
         return $tag->lessons->first();
+    }
+
+    /**
+     * @param $query
+     * @return mixed
+     */
+    public function scopeWithDefaultRelations($query)
+    {
+        return $query->with(['gender','account']);
     }
 }

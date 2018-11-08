@@ -5,6 +5,24 @@ namespace App;
 /**
  * Class Logger
  * @package App
+ *
+ * @OA\Schema(
+ *   schema="History",
+ *   type="object",
+ *   allOf={
+ *      @OA\Schema(ref="#/components/schemas/History"),
+ *      @OA\Schema(
+ *          required={"user_id","log_type_id","message"},
+ *          @OA\Property(property="id", type="integer"),
+ *          @OA\Property(property="user_id", type="integer"),
+ *          @OA\Property(property="status", type="integer"),
+ *          @OA\Property(property="log_type_id", type="integer"),
+ *          @OA\Property(property="message", type="string"),
+ *          @OA\Property(property="created_at", format="timestamp", type="string"),
+ *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *      )
+ *   }
+ * )
  */
 class Logger extends ModelExtender
 {
