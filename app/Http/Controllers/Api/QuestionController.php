@@ -15,6 +15,9 @@ use App\Http\Controllers\Controller;
  *      path="/questions",
  *      tags={"Questions"},
  *      description="Get list of all models without any definitions",
+ *      security={
+ *          {"passport": {}},
+ *      },
  *      @OA\Response(
  *          response=200,
  *          description="successful operation",
@@ -28,6 +31,9 @@ use App\Http\Controllers\Controller;
  *      path="/questions/{id}",
  *      tags={"Questions"},
  *      description="Returns model with all default definitions",
+ *      security={
+ *          {"passport": {}},
+ *      },
  *      @OA\Parameter(
  *          description="ID of model",
  *          in="path",

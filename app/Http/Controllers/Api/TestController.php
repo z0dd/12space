@@ -13,6 +13,9 @@ use App\Test;
  *      path="/tests",
  *      tags={"Tests"},
  *      description="Get list of all models without any definitions",
+ *      security={
+ *          {"passport": {}},
+ *      },
  *      @OA\Response(
  *          response=200,
  *          description="successful operation",
@@ -26,6 +29,9 @@ use App\Test;
  *      path="/tests/{id}",
  *      tags={"Tests"},
  *      description="Returns model with all default definitions",
+ *      security={
+ *          {"passport": {}},
+ *      },
  *      @OA\Parameter(
  *          description="ID of model",
  *          in="path",

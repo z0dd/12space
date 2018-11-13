@@ -20,6 +20,7 @@ namespace App;
  *          @OA\Property(property="mime", type="string"),
  *          @OA\Property(property="file_type_id", type="integer"),
  *          @OA\Property(property="gender_id", type="integer"),
+ *          @OA\Property(property="link", type="string"),
  *          @OA\Property(property="created_at", format="timestamp", type="string"),
  *          @OA\Property(property="updated_at", format="timestamp", type="string")
  *      )
@@ -38,6 +39,7 @@ class LessonContent extends ModelExtender
         'mime',
         'file_type_id',
         'gender_id',
+        'link',
     ];
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -75,6 +77,7 @@ class LessonContent extends ModelExtender
             'mime' => 'required|string|min:1|max:250',
             'file_type_id' => 'required|min:1|integer',
             'gender_id' => 'required|min:1|integer',
+            'link' => 'string|min:1',
         ];
     }
 }

@@ -3,7 +3,7 @@
 namespace App;
 
 use App\Exceptions\ApiException;
-use Carbon\Carbon;
+use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -35,7 +35,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  */
 class User extends \TCG\Voyager\Models\User implements ApiModelInterface
 {
-    use Notifiable;
+    use HasApiTokens, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -115,33 +115,24 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
 
         if (false == $lastPassedTest) {
             // Возвращаем первый урок
-            return Lesson::withDefaultRelations()->first();
+            return Lesson::firstLesson();
         }
 
-        $answer =& $lastPassedTest->answer;
-
-        if ($answer->created_at->diffInDays(Carbon::now()) < config('settings.days_between_lessons')) {
+        if (false === $lastPassedTest->nextLessonConditionsSuccess()) {
             throw new ApiException('Доступ к следующему уроку пока закрыт',400);
         }
 
-        if ($answer->tags->isEmpty()) {
-            // Если нет связи по тегам
-            $nextLesson = $lastPassedTest->test->lesson->getNextLesson();
+        $nextLesson = $lastPassedTest->nextLesson();
 
-            if (empty($nextLesson)) {
-                throw new ApiException('Все уроки пройдены');
-            }
-
-            return $nextLesson;
+        if (is_null($nextLesson)) {
+            throw new ApiException('Все уроки пройдены');
         }
 
-        $tag = $lastPassedTest->answer->tags->first();
-
-        if ($tag->lessons->isEmpty()) {
-            throw new ApiException('Нет связанных уроков');
+        if (false === $nextLesson) {
+            throw new ApiException('Ошибка при получении следующего урока');
         }
 
-        return $tag->lessons->first();
+        return $nextLesson;
     }
 
     /**
@@ -151,5 +142,15 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
     public function scopeWithDefaultRelations($query)
     {
         return $query->with(['gender','account']);
+    }
+
+    /**
+     * Get the user's full name.
+     *
+     * @return string
+     */
+    public function getFullNameAttribute()
+    {
+        return "{$this->name} {$this->last_name}";
     }
 }

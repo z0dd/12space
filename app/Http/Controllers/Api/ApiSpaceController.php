@@ -28,6 +28,7 @@ use App\Http\Controllers\Controller;
  *     ),
  * )
  *
+ *
  * Class ApiSpaceController
  * @package App\Http\Controllers\Api
  */

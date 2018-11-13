@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Carbon\Carbon;
+
 /**
  * Class PassedTest
  * @package App
@@ -79,5 +81,40 @@ class PassedTest extends ModelExtender
             'question_id' => 'required|integer|min:1',
             'answer_id' => 'required|integer|min:1',
         ];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function nextLesson()
+    {
+        if ($this->answer->tags->isEmpty()) {
+            // Если нет связи по тегам
+            $nextLesson = $this->test->lesson->getNextLesson();
+
+            if (empty($nextLesson)) {
+                return null;
+            }
+
+            return $nextLesson;
+        }
+
+        $tag = $this->answer->tags->first();
+
+        if ($tag->lessons->isEmpty()) {
+            return false;
+        }
+
+        return $tag->lessons->first();
+    }
+
+    /**
+     * Метод определяет возможность показать следующий урок после пройденного теста
+     * @return bool
+     */
+    public function nextLessonConditionsSuccess() :bool
+    {
+        return $this->answer->created_at
+                ->diffInDays(Carbon::now()) >= config('settings.days_between_lessons');
     }
 }

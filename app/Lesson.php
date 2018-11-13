@@ -1,6 +1,7 @@
 <?php
 
 namespace App;
+use function foo\func;
 
 /**
  * Class Lesson
@@ -20,7 +21,7 @@ namespace App;
  *          @OA\Property(property="text", type="string"),
  *          @OA\Property(property="gender_id", type="integer"),
  *          @OA\Property(property="template_id", type="integer"),
- *          @OA\Property(property="status", type="integer"),
+ *          @OA\Property(property="status", type="integer", description="0-not_available, 1-available, 2-passed, 3-closed"),
  *          @OA\Property(property="sort_order", type="integer"),
  *          @OA\Property(property="published_at", type="string"),
  *          @OA\Property(property="created_at", format="timestamp", type="string"),
@@ -31,6 +32,13 @@ namespace App;
  */
 class Lesson extends ModelExtender
 {
+    const LESSON_STATUSES = [
+        'not_available' => 0,
+        'available' => 1,
+        'passed' => 2,
+        'closed' => 3,
+    ];
+
     /**
      * @var array
      */
@@ -137,5 +145,50 @@ class Lesson extends ModelExtender
             ->where('id', '!=', $this->id)
             ->sortBy('sort_order')
             ->first();
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function firstLesson()
+    {
+        return Lesson::withDefaultRelations()->first();
+    }
+
+    /**
+     * @param User $user
+     * @return $this
+     */
+    public function attachStatus(User $user)
+    {
+        $lesson_id = $this->id;
+        if (false == $user->passedTests->isEmpty()) {
+            // Если текущий урок уже пройден
+            $filtered = $user->passedTests->filter(function ($passedTest) use ($lesson_id) {
+                return $passedTest->test->lesson->id == $lesson_id;
+            });
+
+            if (false == $filtered->isEmpty()) {
+                $this->status = self::LESSON_STATUSES['passed'];
+
+                return $this;
+            }
+
+            // Если текущий урок должен быть следующим
+            $passedTest = $user->passedTests->last();
+            $nextLesson = $passedTest->nextLesson();
+
+            if ($nextLesson && $nextLesson->id == $this->id) {
+                $this->status = $passedTest->nextLessonConditionsSuccess()
+                    ? self::LESSON_STATUSES['available']
+                    : self::LESSON_STATUSES['not_available'];
+
+                return $this;
+            }
+        }
+
+
+
+        return $this;
     }
 }

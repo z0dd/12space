@@ -52,4 +52,34 @@ class Template extends ModelExtender
             'data' => 'string',
         ];
     }
+
+    /**
+     * @return bool
+     * @throws \SendGrid\Mail\TypeException
+     */
+    public function sendNotify(User $user)
+    {
+        $email = new \SendGrid\Mail\Mail();
+
+        $email->setFrom("test@example.com", "Example User");
+        $email->setSubject("Sending with SendGrid is Fun");
+        $email->addTo($user->email, $user->full_name);
+        $email->addContent(
+            "text/plain",
+            "test"
+        );
+        $email->addContent(
+            "text/html",
+            "<strong>and easy to do anywhere, even with PHP</strong>"
+        );
+        $sendgrid = new \SendGrid(env('SENDGRID_API_KEY'));
+
+        try {
+            $response = $sendgrid->send($email);
+        } catch (Exception $e) {
+            echo 'Caught exception: ',  $e->getMessage(), "\n";
+        }
+
+        return $response->statusCode() == 202;
+    }
 }
