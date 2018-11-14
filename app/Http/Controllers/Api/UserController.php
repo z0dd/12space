@@ -215,7 +215,6 @@ class UserController extends ApiSpaceController
         $lessons = Lesson::withDefaultRelations()->get();
 
         foreach ($lessons as $lesson) {
-            dd($lesson->template->sendNotify($user));
             $lesson->attachStatus($user);
         }
 

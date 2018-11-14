@@ -59,19 +59,30 @@ class Template extends ModelExtender
      */
     public function sendNotify(User $user)
     {
+        $templateId = $this->getTemplateId();
+
         $email = new \SendGrid\Mail\Mail();
 
-        $email->setFrom("test@example.com", "Example User");
-        $email->setSubject("Sending with SendGrid is Fun");
-        $email->addTo($user->email, $user->full_name);
-        $email->addContent(
-            "text/plain",
-            "test"
+        $email->setFrom(
+            config('mail.from.address'),
+            config('mail.from.name')
         );
-        $email->addContent(
-            "text/html",
-            "<strong>and easy to do anywhere, even with PHP</strong>"
+
+        $email->addTo(
+            $user->email,
+            $user->full_name
         );
+
+        if ($templateId) {
+            $email->setTemplateId($templateId);
+        }else{
+            $email->setSubject("Hello there!");
+            $email->addContent(
+                "text/html",
+                "<strong>Nothing here</strong>"
+            );
+        }
+
         $sendgrid = new \SendGrid(env('SENDGRID_API_KEY'));
 
         try {
@@ -81,5 +92,29 @@ class Template extends ModelExtender
         }
 
         return $response->statusCode() == 202;
+    }
+
+    /**
+     * @return null
+     */
+    public function getTemplateId()
+    {
+        $data = $this->unpackData();
+
+        return false == empty($data['template_id'])
+            ? $data['template_id']
+            : null;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function unpackData($data = null)
+    {
+        if (false == is_null($data)) {
+            return json_decode($data,1);
+        } else {
+            return json_decode($this->data,1);
+        }
     }
 }
