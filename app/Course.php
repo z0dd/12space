@@ -17,6 +17,7 @@ namespace App;
  *          @OA\Property(property="name", type="string"),
  *          @OA\Property(property="price", format="double", type="number"),
  *          @OA\Property(property="status_id", type="integer"),
+ *          @OA\Property(property="image", type="string"),
  *          @OA\Property(property="created_at", format="timestamp", type="string"),
  *          @OA\Property(property="updated_at", format="timestamp", type="string")
  *      )
@@ -59,6 +60,7 @@ class Course extends ModelExtender
             'name' => 'required|string|min:3|max:250',
             'price' => 'required|digits_between:0,2|min:0|',
             'status_id' => 'required|min:1|integer',
+            'image' => 'string',
         ];
     }
 

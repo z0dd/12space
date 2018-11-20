@@ -57,7 +57,7 @@ use App\Http\Controllers\Controller;
  *      @OA\Response(response=404, description="Not found"),
  * )
  * @OA\Post(
- *     path="users/{user_id}/answers/{answer_id}",
+ *     path="/users/{user_id}/answers/{answer_id}",
  *     tags={"Users"},
  *     description="Save user answer",
  *      security={

@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 Route::middleware(['auth:api'])->group(function () {
-    Route::get('accounts', 'Api\AccountController@show')->name('getAccounts')->middleware('auth:api');
+    Route::get('accounts', 'Api\AccountController@show')->name('getAccounts');
     Route::get('accounts/{id}', 'Api\AccountController@get')->name('getAccount');
 
     Route::get('answers', 'Api\AnswerController@show')->name('getAnswers');
@@ -46,9 +46,14 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('tests', 'Api\TestController@show');
     Route::get('tests/{id}', 'Api\TestController@get');
 
-    Route::get('users', 'Api\UserController@show')->middleware('auth:api');
-    Route::get('users/{id}', 'Api\UserController@get');
-    Route::post('users/{user_id}/answers/{answer_id}', 'Api\UserController@saveAnswer');
+    Route::get('users', 'Api\UserController@show');
+    Route::get('users/{user_id}', 'Api\UserController@get');
     Route::get('users/{user_id}/lessons/current', 'Api\UserController@getCurrentLesson');
     Route::get('users/{user_id}/lessons', 'Api\UserController@getLessons');
+    Route::post('users/{user_id}/answers/{answer_id}', 'Api\UserController@saveAnswer');
+
+
+    Route::get('app/{user_id}/lessons/{lesson_id}', 'Api\AppController@getLesson');
+    Route::get('app/{user_id}/tests/{test_id}', 'Api\AppController@getTest');
 });
+    Route::get('app/{user_id}/', 'Api\AppController@index');

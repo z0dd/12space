@@ -21,11 +21,13 @@ use function foo\func;
  *          @OA\Property(property="text", type="string"),
  *          @OA\Property(property="gender_id", type="integer"),
  *          @OA\Property(property="template_id", type="integer"),
+ *          @OA\Property(property="duration", type="integer"),
+ *          @OA\Property(property="image", type="string"),
  *          @OA\Property(property="status", type="integer", description="0-not_available, 1-available, 2-passed, 3-closed"),
  *          @OA\Property(property="sort_order", type="integer"),
  *          @OA\Property(property="published_at", type="string"),
  *          @OA\Property(property="created_at", format="timestamp", type="string"),
- *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *          @OA\Property(property="updated_at", format="timestamp", type="string"),
  *      )
  *   }
  * )
@@ -52,6 +54,7 @@ class Lesson extends ModelExtender
         'status',
         'sort_order',
         'text',
+        'image',
     ];
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -123,6 +126,8 @@ class Lesson extends ModelExtender
             'status' => 'integer|min:1',
             'sort_order' => 'integer|min:1',
             'text' => 'required|string',
+            'duration' => 'integer|min:1',
+            'image' => 'string',
         ];
     }
 
@@ -145,14 +150,6 @@ class Lesson extends ModelExtender
             ->where('id', '!=', $this->id)
             ->sortBy('sort_order')
             ->first();
-    }
-
-    /**
-     * @return mixed
-     */
-    public static function firstLesson()
-    {
-        return Lesson::withDefaultRelations()->first();
     }
 
     /**
@@ -186,8 +183,6 @@ class Lesson extends ModelExtender
                 return $this;
             }
         }
-
-
 
         return $this;
     }

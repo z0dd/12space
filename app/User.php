@@ -38,6 +38,11 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
     use HasApiTokens, Notifiable;
 
     /**
+     * @var
+     */
+    private $lessons;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
@@ -88,6 +93,52 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function courses()
+    {
+        return $this->hasManyThrough(
+            Course::class,
+            UserToCourse::class,
+            'user_id',
+            'id',
+            'id',
+            'course_id'
+        );
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function userCourses()
+    {
+        return $this->hasMany(UserToCourse::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function userModules()
+    {
+        return $this->hasMany(UserToModule::class);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function modules()
+    {
+        return $this->hasManyThrough(
+            Module::class,
+            UserToModule::class,
+            'user_id',
+            'id',
+            'id',
+            'module_id'
+        );
+    }
+
+    /**
      * @return array
      */
     public function rules() :array
@@ -104,18 +155,39 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
     }
 
     /**
+     * @param $query
+     * @return mixed
+     */
+    public function scopeWithDefaultRelations($query)
+    {
+        return $query->with(['gender','account']);
+    }
+
+    /**
+     * Get the user's full name.
+     *
+     * @return string
+     */
+    public function getFullNameAttribute()
+    {
+        return "{$this->name} {$this->last_name}";
+    }
+
+    /**
      * @return mixed
      * @throws ApiException
      */
     public function currentLesson()
     {
+        $lessons = $this->lessons();
+
         $lastPassedTest = PassedTest::where('user_id', $this->id)
             ->orderBy('created_at', 'desc')
             ->first();
 
         if (false == $lastPassedTest) {
             // Возвращаем первый урок
-            return Lesson::firstLesson();
+            return $this->activeModule()->lessons->first();
         }
 
         if (false === $lastPassedTest->nextLessonConditionsSuccess()) {
@@ -136,21 +208,76 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
     }
 
     /**
-     * @param $query
-     * @return mixed
+     * @return array
+     * @throws ApiException
      */
-    public function scopeWithDefaultRelations($query)
+    public function parsedCourses()
     {
-        return $query->with(['gender','account']);
+        $courses = [];
+
+        if ($this->courses->isEmpty()) {
+            throw new ApiException('Нет доступных курсов');
+        }
+
+        foreach ($this->userCourses as $userCourse) {
+            $courseStatus = array_search($userCourse->status, UserToCourse::STATUSES);
+            if (empty($courses[$courseStatus])) {
+                $courses[$courseStatus] = $userCourse->course;
+            } else {
+                $courses[$courseStatus][] = $userCourse->course;
+            }
+        }
+
+        return $courses;
     }
 
     /**
-     * Get the user's full name.
-     *
-     * @return string
+     * @return Course
+     * @throws ApiException
      */
-    public function getFullNameAttribute()
+    public function activeCourse()
     {
-        return "{$this->name} {$this->last_name}";
+        $userToCourse = UserToCourse::findCourseInCollection($this->userCourses, UserToCourse::STATUSES['in_progress']);
+
+        if (empty($userToCourse)) {
+            $userToCourse = UserToCourse::findCourseInCollection($this->userCourses, UserToCourse::STATUSES['available']);
+        }
+
+        if (empty($userToCourse)) {
+            throw new ApiException('Нет доступных курсов');
+        }
+
+        return $userToCourse->course;
+    }
+
+    /**
+     * @return Module
+     * @throws ApiException
+     */
+    public function activeModule()
+    {
+        $userToModule = UserToModule::findModuleInCollection($this->userModules, UserToModule::STATUSES['in_progress']);
+
+        if (empty($userToModule)) {
+            $userToModule = UserToModule::findModuleInCollection($this->userModules, UserToModule::STATUSES['available']);
+        }
+
+        if (empty($userToModule)) {
+            throw new ApiException('Нет доступных модулей');
+        }
+
+        return $userToModule->module;
+    }
+
+    /**
+     * @return mixed
+     * @throws ApiException
+     */
+    public function lessons()
+    {
+        if (empty($this->lessons)) {
+            $this->lessons = $this->activeCourse()->lessons;
+        }
+        return $this->lessons;
     }
 }

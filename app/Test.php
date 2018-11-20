@@ -83,6 +83,6 @@ class Test extends ModelExtender
      */
     public function scopeWithDefaultRelations($query)
     {
-        return $query->with(['questions']);
+        return $query->with(['questions.answers']);
     }
 }
