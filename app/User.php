@@ -276,7 +276,7 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
     public function lessons()
     {
         if (empty($this->lessons)) {
-            $this->lessons = $this->activeCourse()->lessons;
+            $this->lessons = $this->activeModule()->lessons;
         }
         return $this->lessons;
     }

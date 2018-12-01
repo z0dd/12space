@@ -52,8 +52,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('users/{user_id}/lessons', 'Api\UserController@getLessons');
     Route::post('users/{user_id}/answers/{answer_id}', 'Api\UserController@saveAnswer');
 
-
+    Route::get('app/{user_id}/', 'Api\AppController@index');
     Route::get('app/{user_id}/lessons/{lesson_id}', 'Api\AppController@getLesson');
     Route::get('app/{user_id}/tests/{test_id}', 'Api\AppController@getTest');
+
+    Route::get('app/{user_id}/stories', 'Api\AppController@getStories');
+    Route::post('app/{user_id}/stories/{story_contents_id}', 'Api\AppController@saveStory');
 });
-    Route::get('app/{user_id}/', 'Api\AppController@index');

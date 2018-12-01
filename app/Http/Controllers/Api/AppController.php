@@ -5,9 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Lesson;
 use App\PassedTest;
+use App\Story;
+use App\StoryContent;
+use App\StoryContentToUser;
 use App\Test;
 use App\User;
+use function foo\func;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class AppController
@@ -161,6 +166,7 @@ class AppController extends Controller
     public function getLesson(Request $request, int $user_id, int $lesson_id)
     {
         $lesson = Lesson::findOrFail($lesson_id);
+
         return [
             'lesson' => $lesson,
             'tests' => $lesson->tests,
@@ -232,5 +238,105 @@ class AppController extends Controller
             'test' => Test::withDefaultRelations()->findOrFail($test_id),
             'passed' => $pasedTest,
         ];
+    }
+
+    /**
+     *  @OA\Get(
+     *      path="/app/{user_id}/stories",
+     *      tags={"App"},
+     *      description="Stories",
+     *      security={
+     *          {"passport": {}},
+     *      },
+     *      @OA\Parameter(
+     *          description="ID of user",
+     *          in="path",
+     *          name="user_id",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="integer",
+     *              format="int64",
+     *         )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation",
+     *          @OA\JsonContent(
+     *              type="array",
+     *                  @OA\Items(ref="#/components/schemas/Story"),
+     *              )
+     *          )
+     *      ),
+     * )
+     *
+     * @param Request $request
+     * @param int $user_id
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function getStories(Request $request, int $user_id)
+    {
+        $user = User::findOrFail($user_id);
+
+        $stories = Story::with('content')->get();
+
+
+        $stories->each(function ($story) use ($user){
+            foreach ($story->content as &$content) {
+                $content->viewed = $content->checkViewed($user);
+            }
+        });
+
+        return $stories;
+    }
+
+    /**
+     * @param Request $request
+     * @param int $user_id
+     * @param int $story_contents_id
+     * @return mixed
+     *
+     *  @OA\Post(
+     *      path="/app/{user_id}/stories/{story_content_id}",
+     *      tags={"App"},
+     *      description="Stories",
+     *      security={
+     *          {"passport": {}},
+     *      },
+     *      @OA\Parameter(
+     *          description="ID of user",
+     *          in="path",
+     *          name="user_id",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="integer",
+     *              format="int64",
+     *         )
+     *      ),
+     *     @OA\Parameter(
+     *          description="ID story content",
+     *          in="path",
+     *          name="story_content_id",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="integer",
+     *              format="int64",
+     *         )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation",
+     *          @OA\JsonContent(ref="#/components/schemas/StoryContentToUser")
+     *      ),
+     * )
+     */
+    public function saveStory(Request $request, int $user_id, int $story_contents_id)
+    {
+        $user = User::findOrFail($user_id);
+        $storyContent = StoryContent::findOrFail($story_contents_id);
+
+        return StoryContentToUser::firstOrCreate([
+                'story_contents_id' => $storyContent->id,
+                'user_id' => $user->id,
+            ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App;
 use function foo\func;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class Lesson
@@ -62,6 +63,15 @@ class Lesson extends ModelExtender
     public function template()
     {
         return $this->belongsTo(Template::class);
+    }
+
+    /**
+     * @param $value
+     * @return mixed
+     */
+    public function getImageAttribute($value)
+    {
+        return Storage::url($value);
     }
 
     /**
