@@ -52,7 +52,7 @@ use App\Http\Controllers\Controller;
  *      @OA\Response(response=404, description="Not found"),
  * )
  */
-class LessonTypeController extends Controller
+class LessonTypeController extends ApiSpaceController
 {
     /**
      * LessonTypeController constructor.
