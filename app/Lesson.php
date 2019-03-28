@@ -1,7 +1,7 @@
 <?php
 
 namespace App;
-use function foo\func;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -122,6 +122,21 @@ class Lesson extends ModelExtender
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function tags()
+    {
+        return $this->hasManyThrough(
+            Tag::class,
+            TagToLesson::class,
+            'lesson_id',
+            'id',
+            'id',
+            'tag_id'
+        );
+    }
+
+    /**
      * @return array
      */
     public function rules() :array
@@ -192,8 +207,116 @@ class Lesson extends ModelExtender
 
                 return $this;
             }
+
+            // Если это не следующий урок, не пройденный и не закрытый админом,
+            // то ставим ему статус - не доступен
+            if ($nextLesson
+                && $nextLesson->id != $this->id
+                && $this->status != self::LESSON_STATUSES['passed']
+                && $this->status != self::LESSON_STATUSES['closed']
+            ) {
+                $this->status = self::LESSON_STATUSES['not_available'];
+            }
         }
 
         return $this;
+    }
+
+    /**
+     * @return array|mixed
+     */
+    public function renderContents()
+    {
+        if($this->contents->isEmpty()) {
+            return [];
+        }
+
+        foreach ($this->contents as $content) {
+            $content->render();
+        }
+
+        return $this->contents;
+    }
+
+    /**
+     * @param User $user
+     * @return $this
+     * @throws Exceptions\ApiException
+     */
+    public function attachPublish(User $user)
+    {
+        $lastPassedTest = $user->getLastPassedTest();
+        $prevLesson = $this->getPrevLessonByUser($user);
+        $test = $this->tests->first();
+
+        // Если пройден только первый тест:
+        if ($test && $lastPassedTest && $lastPassedTest->test_id == $test->id) {
+
+            $userModule = $user->getAttachedUserToModuleByLesson($this);
+            if (is_null($userModule)) {
+                $this->published_at = $user->created_at->format('Y-m-d H:i:s');
+            } else {
+                $this->published_at = $userModule->created_at->format('Y-m-d H:i:s');
+            }
+            $this->published_at = $lastPassedTest->created_at->addDays(config('settings.days_between_lessons'))->format('Y-m-d H:i:s');
+
+        } else if ($prevLesson){
+            $this->published_at =
+                (
+                    new Carbon($prevLesson->attachPublish($user)->published_at)
+                )->addDays(config('settings.days_between_lessons'))->format('Y-m-d H:i:s');
+        } else {
+            $userModule = $user->getAttachedUserToModuleByLesson($this);
+
+            if (is_null($userModule)) {
+                $this->published_at = $user->created_at->format('Y-m-d H:i:s');
+            } else {
+                $this->published_at = $userModule->created_at->format('Y-m-d H:i:s');
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPrevLesson()
+    {
+        $tag = $this->tags()->first();
+
+        $lesson = Lesson::where('sort_order','<',$this->sort_order)
+            ->orderBy('sort_order','desc');
+
+        if (!is_null($tag)) {
+            $lesson->join('tag_to_lessons', function ($q) use ($tag) {
+                $q->on('tag_to_lessons.lesson_id','lessons.id')
+                    ->where(function ($q) use ($tag) {
+                        $q->where('tag_to_lessons.tag_id', $tag->id)
+                        ->orWhereNull('tag_to_lessons.tag_id');
+                    });
+
+            })
+            ->select('lessons.*');
+        }
+
+        return $lesson->first();
+    }
+
+    /**
+     * @param User $user
+     * @return Lesson|null
+     * @throws Exceptions\ApiException
+     */
+    public function getPrevLessonByUser(User $user) :? Lesson
+    {
+        $prev = null;
+        foreach ($user->lessons() as $lesson) {
+            if ($lesson->id == $this->id){
+                return $prev;
+            }
+            $prev = $lesson;
+        }
+        return $prev;
     }
 }

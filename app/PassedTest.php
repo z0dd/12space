@@ -88,9 +88,13 @@ class PassedTest extends ModelExtender
      */
     public function nextLesson()
     {
-        if ($this->answer->tags->isEmpty()) {
+        $tags = $this->user->getPassedTags();
+
+        if ($tags->isEmpty()) {
             // Если нет связи по тегам
             $nextLesson = $this->test->lesson->getNextLesson();
+
+            $nextLesson->published_at = $this->created_at->addDays(config('settings.days_between_lessons'))->format('Y-m-d H:i:s');
 
             if (empty($nextLesson)) {
                 return null;
@@ -99,13 +103,19 @@ class PassedTest extends ModelExtender
             return $nextLesson;
         }
 
-        $tag = $this->answer->tags->first();
+        $tag = $tags->first();
+        $tag = Tag::find($tag['id']);
 
         if ($tag->lessons->isEmpty()) {
             return false;
         }
 
-        return $tag->lessons->first();
+        foreach ($tag->lessons as $lesson) {
+            if ($lesson->sort_order > $this->test->lesson->sort_order)
+                return $lesson;
+        }
+
+        return false;
     }
 
     /**
@@ -114,7 +124,7 @@ class PassedTest extends ModelExtender
      */
     public function nextLessonConditionsSuccess() :bool
     {
-        return $this->answer->created_at
+        return $this->created_at
                 ->diffInDays(Carbon::now()) >= config('settings.days_between_lessons');
     }
 }

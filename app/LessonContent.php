@@ -80,4 +80,19 @@ class LessonContent extends ModelExtender
             'link' => 'string|min:1',
         ];
     }
+
+    public function render()
+    {
+        $files = json_decode($this->file,1);
+
+        if (is_array($files)) {
+            foreach ($files as &$file) {
+                if (isset($file['download_link'])) {
+                    $file = \Storage::url($file['download_link']);
+                }
+            }
+        }
+
+        $this->file = $files;
+    }
 }

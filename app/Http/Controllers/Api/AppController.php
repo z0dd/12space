@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Gender;
 use App\Http\Controllers\Controller;
 use App\Lesson;
 use App\PassedTest;
@@ -13,6 +14,7 @@ use App\User;
 use function foo\func;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use OpenApi\Annotations\Get;
 
 /**
  * Class AppController
@@ -95,13 +97,26 @@ class AppController extends Controller
      */
     public function index(Request $request, int $user_id)
     {
-        $user = User::with(['courses.modules', 'passedTests'])
+        $user = User::with(['courses.modules.lessons', 'passedTests.test.lesson'])
                ->findOrFail($user_id);
+
+        // Собираем все пройденные уроки в массив для последующего подсчета
+        $passedLessons = [];
+        foreach ($user->passedTests as $passedTest) {
+            $passedLessons[$passedTest->test->lesson->id] = $passedTest->test->lesson;
+        }
+
+        // Проверим, если урок уже есть в пройденных, то обновим ему статус.
+        $lessons = $user->lessons();
+        foreach ($lessons as &$lesson) {
+            $lesson = $lesson->attachStatus($user)->attachPublish($user);
+        }
 
         return [
             'courses' => $user->parsedCourses(),
-            'lessons' => $user->lessons(),
+            'lessons' => $lessons->values(),
             'passed'  => $user->passedTests,
+            'passedLessonsCount' => count($passedLessons),
         ];
     }
 
@@ -165,12 +180,18 @@ class AppController extends Controller
      */
     public function getLesson(Request $request, int $user_id, int $lesson_id)
     {
-        $lesson = Lesson::findOrFail($lesson_id);
+        $user = User::findOrFail($user_id);
+
+        $lesson = Lesson::with(['contents' => function ($q) use ($user) {
+            $q->where('gender_id', $user->gender_id)
+                ->orWhere('gender_id', Gender::getAnyGenderId());
+
+        }])->findOrFail($lesson_id);
 
         return [
             'lesson' => $lesson,
             'tests' => $lesson->tests,
-            'contents' => $lesson->contents,
+            'contents' => $lesson->renderContents(),
         ];
     }
 
@@ -338,5 +359,87 @@ class AppController extends Controller
                 'story_contents_id' => $storyContent->id,
                 'user_id' => $user->id,
             ]);
+    }
+
+    /**
+     * @param Request $request
+     * @param int $story_id
+     * @param int $user_id
+     * @return Story
+     *
+     *  @OA\Get(
+     *      path="/app/{user_id}/stories/{story_id}",
+     *      tags={"App"},
+     *      description="Story",
+     *      security={
+     *          {"passport": {}},
+     *      },
+     *      @OA\Parameter(
+     *          description="ID of user",
+     *          in="path",
+     *          name="user_id",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="integer",
+     *              format="int64",
+     *         )
+     *      ),
+     *      @OA\Parameter(
+     *          description="Story ID",
+     *          in="path",
+     *          name="story_id",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="integer",
+     *              format="int64",
+     *         )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation",
+     *          @OA\JsonContent(ref="#/components/schemas/Story")
+     *      ),
+     * )
+     */
+    public function getStory(Request $request, int $user_id, int $story_id)
+    {
+        $user = User::findOrFail($user_id);
+
+        $story = Story::with('content')->findOrFail($story_id);
+
+        foreach ($story->content as &$content) {
+            $content->viewed = $content->checkViewed($user);
+        }
+
+        return $story;
+    }
+
+    /**
+     * @return array
+     *
+     * @OA\Post(
+     *      path="/app/logout",
+     *      tags={"App"},
+     *      description="Logout",
+     *      security={
+     *          {"passport": {}},
+     *      },
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation",
+     *      ),
+     * )
+     */
+    public function logout()
+    {
+        if (\Auth::check()) {
+            \Auth::user()->AauthAcessToken()->delete();
+            return [
+                'success' => true
+            ];
+        }
+        return [
+            'success' => false,
+        ];
     }
 }

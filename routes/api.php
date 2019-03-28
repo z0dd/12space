@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::middleware(['auth:api'])->group(function () {
+Route::middleware(['auth:api'/*,'checkApiUserAccess'*/])->group(function () {
     Route::get('accounts', 'Api\AccountController@show')->name('getAccounts');
     Route::get('accounts/{id}', 'Api\AccountController@get')->name('getAccount');
 
@@ -21,6 +21,8 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::get('courses', 'Api\CourseController@show')->name('getCourses');
     Route::get('courses/{id}', 'Api\CourseController@get')->name('getCourse');
+
+    Route::get('courses/{id}/lessons', 'Api\CourseController@getLessons');
 
     Route::get('courses/statuses', 'Api\CourseStatusController@show')->name('getCoursesStatuses');
     Route::get('courses/statuses/{id}', 'Api\CourseStatusController@get')->name('getCourseStatus');
@@ -47,15 +49,19 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('tests/{id}', 'Api\TestController@get');
 
     Route::get('users', 'Api\UserController@show');
-    Route::get('users/{user_id}', 'Api\UserController@get');
+    Route::get('users/{user_id}/', 'Api\UserController@get');
+    Route::put('users/{user_id}/', 'Api\UserController@saveUser');
     Route::get('users/{user_id}/lessons/current', 'Api\UserController@getCurrentLesson');
     Route::get('users/{user_id}/lessons', 'Api\UserController@getLessons');
-    Route::post('users/{user_id}/answers/{answer_id}', 'Api\UserController@saveAnswer');
+    Route::put('users/{user_id}/answers/{answer_id}', 'Api\UserController@saveAnswer');
+    Route::put('users/reset', 'Api\UserController@sendResetLinkEmail');
 
     Route::get('app/{user_id}/', 'Api\AppController@index');
     Route::get('app/{user_id}/lessons/{lesson_id}', 'Api\AppController@getLesson');
     Route::get('app/{user_id}/tests/{test_id}', 'Api\AppController@getTest');
-
     Route::get('app/{user_id}/stories', 'Api\AppController@getStories');
+    Route::get('app/{user_id}/stories/{story_id}', 'Api\AppController@getStory');
     Route::post('app/{user_id}/stories/{story_contents_id}', 'Api\AppController@saveStory');
+    Route::get('app/{user_id}/modules', 'Api\AppController@getModules');
+    Route::any('app/logout', 'Api\AppController@logout')->name('apiLogout');
 });

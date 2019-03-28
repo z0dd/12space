@@ -70,6 +70,6 @@ class Course extends ModelExtender
      */
     public function scopeWithDefaultRelations($query)
     {
-        return $query->with(['modules']);
+        return $query->with(['modules.lessons']);
     }
 }

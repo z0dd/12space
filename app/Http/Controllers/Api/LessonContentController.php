@@ -62,4 +62,9 @@ class LessonContentController extends ApiSpaceController
     {
         $this->model = $model;
     }
+
+    public function get(\Illuminate\Http\Request $request, int $id)
+    {
+        return $this->model->withDefaultRelations()->findOrFail($id)->render();
+    }
 }

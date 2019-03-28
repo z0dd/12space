@@ -29,7 +29,15 @@ class ApiException extends Exception
      */
     public function render($request)
     {
-        exit($this->getMessage());
-//        return parent::render($request, $exception);
+        $error = [
+            'status' => 'error',
+            'text'  => $this->getMessage()
+        ];
+
+        if ($request->wantsJson()) {
+            return response()->json($error, 400);
+        }
+
+        return parent::render($request);
     }
 }

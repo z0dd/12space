@@ -61,4 +61,14 @@ class Gender extends ModelExtender
             'name' => 'required|string|min:1|max:250',
         ];
     }
+
+    /**
+     * Возвращает ID пола который обозначает "любой"
+     * @return int
+     */
+    public static function getAnyGenderId()
+    {
+        $gender = self::where('name', 'любой')->first();
+        return is_null($gender) ? 3 : $gender->id;
+    }
 }

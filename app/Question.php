@@ -19,7 +19,8 @@ namespace App;
  *          @OA\Property(property="required", type="boolean"),
  *          @OA\Property(property="sort_order", type="integer"),
  *          @OA\Property(property="created_at", format="timestamp", type="string"),
- *          @OA\Property(property="updated_at", format="timestamp", type="string")
+ *          @OA\Property(property="updated_at", format="timestamp", type="string"),
+ *          @OA\Property(property="timecode", type="integer")
  *      )
  *   }
  * )

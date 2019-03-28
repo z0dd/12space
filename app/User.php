@@ -3,6 +3,8 @@
 namespace App;
 
 use App\Exceptions\ApiException;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Notifications\Messages\MailMessage;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -48,7 +50,7 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password','last_name','phone'
     ];
 
     /**
@@ -179,22 +181,18 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
      */
     public function currentLesson()
     {
-        $lessons = $this->lessons();
-
-        $lastPassedTest = PassedTest::where('user_id', $this->id)
-            ->orderBy('created_at', 'desc')
-            ->first();
+        $lastPassedTest = $this->getLastPassedTest();
 
         if (false == $lastPassedTest) {
             // Возвращаем первый урок
             return $this->activeModule()->lessons->first();
         }
 
-        if (false === $lastPassedTest->nextLessonConditionsSuccess()) {
-            throw new ApiException('Доступ к следующему уроку пока закрыт',400);
-        }
-
         $nextLesson = $lastPassedTest->nextLesson();
+
+        if (false === $lastPassedTest->nextLessonConditionsSuccess()) {
+            $nextLesson->status = Lesson::LESSON_STATUSES['not_available'];
+        }
 
         if (is_null($nextLesson)) {
             throw new ApiException('Все уроки пройдены');
@@ -204,6 +202,9 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
             throw new ApiException('Ошибка при получении следующего урока');
         }
 
+//        $nextLesson->published_at = $lastPassedTest->created_at->addDays(config('settings.days_between_lessons'))->format('Y-m-d H:i:s');
+
+        $nextLesson->attachStatus($this)->attachPublish($this);
         return $nextLesson;
     }
 
@@ -219,15 +220,46 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
             throw new ApiException('Нет доступных курсов');
         }
 
+        $userLessons = $this->lessons();
+
         foreach ($this->userCourses as $userCourse) {
             $courseStatus = array_search($userCourse->status, UserToCourse::STATUSES);
+
+            $userCourse->course->load('modules.lessons');
+
+            if ($userCourse->course && false == $userCourse->course->modules->isEmpty()){
+                // Перебираем модули вложенные в курс
+                foreach ($userCourse->course->modules as &$module) {
+                    if ($module->lessons->isEmpty()) {
+                        continue;
+                    }
+
+                    $lessons = [];
+
+                    // Перебираем уроки вложенные в модуль
+                    foreach ($module->lessons as $key => &$lesson) {
+                        // Фильтруем уроки которые есть в курсе. Оставляем только те, что могут быть показаны пльзоватетелю
+                        if ($userLessons->filter(function ($userLesson) use ($lesson) {
+                            return $userLesson->id == $lesson->id;
+                        })->isNotEmpty()) {
+                            // Собираем ID всех уроков которые должны быть возвращены, что бы потом перезапросить их из БД.
+                            $lessons[] = $lesson->id;
+                        }
+                    }
+
+                    $module->load(['lessons' => function ($q) use ($lessons) {$q->whereIn('lessons.id', $lessons);}]);
+                    foreach ($module->lessons as &$lesson) {
+                        $lesson->attachStatus($this)->attachPublish($this);
+                    }
+                }
+            }
+
             if (empty($courses[$courseStatus])) {
                 $courses[$courseStatus] = $userCourse->course;
             } else {
                 $courses[$courseStatus][] = $userCourse->course;
             }
         }
-
         return $courses;
     }
 
@@ -276,8 +308,86 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
     public function lessons()
     {
         if (empty($this->lessons)) {
-            $this->lessons = $this->activeModule()->lessons;
+
+            $tags = $this->getPassedTags();
+
+            $this->lessons = $this->activeModule()->lessons->filter(function ($lesson) use ($tags) {
+                if (false == $lesson->relationLoaded('tags')) {
+                    $lesson->load('tags');
+                }
+
+                // Если нет пройденных тестов то берем только уроки без тега
+                if (empty($tags)) {
+                    return $lesson->tags->isEmpty();
+                }
+
+                // Уроки без тегов возвращаем всегда
+                if ($lesson->tags->isEmpty())
+                    return true;
+
+                // Перебираем теги ответов и уроков, возвращаем совпадающие
+                if ($lesson->tags->isNotEmpty()) {
+                    foreach ($tags as $answerTag) {
+                        foreach ($lesson->tags as $lessonTag) {
+                            if ($answerTag['id'] == $lessonTag->id) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            });
         }
+
         return $this->lessons;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastPassedTest()
+    {
+        return PassedTest::where('user_id', $this->id)
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function AauthAcessToken(){
+        return $this->hasMany(OauthAccessToken::class);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection|null
+     */
+    public function getPassedTags()
+    {
+        if (empty($this->passedTests) || $this->passedTests->isEmpty())
+            return null;
+
+        $tags = [];
+
+        foreach ($this->passedTests as $passedTest) {
+            if ($passedTest->answer->tags->isNotEmpty())
+                $tags = array_merge($tags, $passedTest->answer->tags->toArray());
+        }
+
+        return collect($tags);
+    }
+
+    public function getAttachedUserToModuleByLesson(Lesson $lesson)
+    {
+        $module = null;
+        foreach ($this->modules as $userModule) {
+            foreach ($lesson->modules as $lessonModule) {
+                if ($userModule->id == $lessonModule->id)
+                    $module = $lessonModule;
+            }
+        }
+        return UserToModule::where('user_id', $this->id)
+            ->where('module_id',$module->id)->first();
     }
 }
