@@ -1,6 +1,7 @@
 <?php
 
 namespace App;
+use SendGrid\Mail\Mail;
 
 /**
  * Class Template
@@ -54,6 +55,7 @@ class Template extends ModelExtender
     }
 
     /**
+     * @param User $user
      * @return bool
      * @throws \SendGrid\Mail\TypeException
      */
@@ -74,6 +76,10 @@ class Template extends ModelExtender
         );
 
         if ($templateId) {
+            if ($this->getTemplateSubstitutions()) {
+                $this->enrichEmail($email,$this->getTemplateSubstitutions());
+            }
+
             $email->setTemplateId($templateId);
         }else{
             $email->setSubject("Hello there!");
@@ -107,6 +113,18 @@ class Template extends ModelExtender
     }
 
     /**
+     * @return null
+     */
+    public function getTemplateSubstitutions()
+    {
+        $data = $this->unpackData();
+
+        return false == empty($data['enrichment'])
+            ? $data['enrichment']
+            : null;
+    }
+
+    /**
      * @return mixed
      */
     public function unpackData($data = null)
@@ -116,5 +134,14 @@ class Template extends ModelExtender
         } else {
             return json_decode($this->data,1);
         }
+    }
+
+    /**
+     * @param Mail $email
+     * @param array $data
+     */
+    public function enrichEmail(Mail &$email, array $data)
+    {
+        //
     }
 }
