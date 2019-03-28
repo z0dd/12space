@@ -8,6 +8,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\ApiException;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,6 +22,7 @@ class CheckApiUserAccess
      * @param $request
      * @param Closure $next
      * @return mixed
+     * @throws ApiException
      */
     public function handle($request, Closure $next)
     {
@@ -30,7 +32,7 @@ class CheckApiUserAccess
         if ($request->route('user_id') !== null) {
             // Закрываем доступ ко всем пользователям кроме своего
             if (Auth::user()->id != $request->route('user_id')) {
-                abort(403);
+                throw new ApiException('Access denied', 403);
             }
         }
 
