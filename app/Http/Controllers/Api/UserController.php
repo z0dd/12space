@@ -13,6 +13,7 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Password;
+use SendGrid\Client;
 
 /**
  * Class UserController
@@ -170,6 +171,10 @@ class UserController extends ApiSpaceController
      */
     public function saveAnswer(\Illuminate\Http\Request $request, int $user_id, int $answer_id)
     {
+        if (isset($_COOKIE['dev'])) {
+            dd(PassedTest::first()->test->lesson->template->sendNotify(User::find($user_id)));
+        }
+
         $answer = Answer::with(['question'])->findOrFail($answer_id);
 
         $passedTest = PassedTest::where('user_id', $user_id)
@@ -318,7 +323,7 @@ class UserController extends ApiSpaceController
 
     /**
      * @param Request $request
-     * @return bool
+     * @return array
      * @throws ApiException
      *
      * @OA\Put(

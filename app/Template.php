@@ -76,10 +76,6 @@ class Template extends ModelExtender
         );
 
         if ($templateId) {
-            if ($this->getTemplateSubstitutions()) {
-                $this->enrichEmail($email,$this->getTemplateSubstitutions());
-            }
-
             $email->setTemplateId($templateId);
         }else{
             $email->setSubject("Hello there!");
@@ -134,14 +130,5 @@ class Template extends ModelExtender
         } else {
             return json_decode($this->data,1);
         }
-    }
-
-    /**
-     * @param Mail $email
-     * @param array $data
-     */
-    public function enrichEmail(Mail &$email, array $data)
-    {
-        //
     }
 }

@@ -275,6 +275,14 @@ class Lesson extends ModelExtender
             }
         }
 
+        if ($this->status === self::LESSON_STATUSES['passed']) {
+            foreach ($user->passedTests as $passedTest) {
+                if ($passedTest->test->lesson_id == $this->id) {
+                    $this->passed_days = $passedTest->updated_at->diff(Carbon::parse($this->published_at))->days;
+                }
+            }
+        }
+
         return $this;
     }
 

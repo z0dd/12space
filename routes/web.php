@@ -18,8 +18,12 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::any('/webhooks/sendgrid', 'WebhookController@sendgrid');
 
+Route::any('/payment', 'PaymentController@payment');
+Route::any('/payment_result/{payment_id}', 'PaymentController@paymentResult');
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 });
+
