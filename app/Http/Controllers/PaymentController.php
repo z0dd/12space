@@ -25,15 +25,15 @@ class PaymentController extends Controller
     {
         $validated = $request->validated();
         $payment = new Payment($validated);
+        $payment->return_id = uniqid("",true);
 
         try {
             $client = new Client();
             $client->setAuth(env('YANDEX_KASSA_SHOPID'),env('YANDEX_KASSA_SECRET'));
 
-            $idempotenceKey = uniqid("",true);
             $yaPayment = $client->createPayment([
                 'amount' => [
-                    'value' => 2.0,
+                    'value' => 4900.0,
                     'currency' => 'RUB',
                 ],
                 'payment_method_data' => [
@@ -41,7 +41,7 @@ class PaymentController extends Controller
                 ],
                 'confirmation' => [
                     'type' => 'redirect',
-                    'return_url' => 'http://12space.ru/',
+                    'return_url' => 'http://12space.101ad.ru/payment_result/'.$payment->return_id,
                 ],
                 'capture' => true,
                 'description' => 'Курс',
@@ -59,7 +59,7 @@ class PaymentController extends Controller
                         ]
                     ],
                 ],
-            ],$idempotenceKey);
+            ],$payment->return_id);
 
         } catch (\Exception $exception) {
 
@@ -80,7 +80,8 @@ class PaymentController extends Controller
     }
 
     /**
-     * @param string $payment_id
+     * @param Request $request
+     * @param         $return_id
      *
      * @return array
      * @throws \Exception
@@ -93,32 +94,31 @@ class PaymentController extends Controller
      * @throws \YandexCheckout\Common\Exceptions\TooManyRequestsException
      * @throws \YandexCheckout\Common\Exceptions\UnauthorizedException
      */
-    public function paymentResult(string $payment_id)
+    public function paymentResult(Request $request, $return_id)
     {
-        $payment = Payment::where('yandex_kassa_id',$payment_id)->first();
+        $payment = Payment::where('return_id',$return_id)->firstOrfail();
+
         $client = new Client();
         $client->setAuth(env('YANDEX_KASSA_SHOPID'),env('YANDEX_KASSA_SECRET'));
-        $yaPayment = $client->getPaymentInfo($payment_id);
+        $yaPayment = $client->getPaymentInfo($payment->yandex_kassa_id);
 
         if (false == isset(Payment::STATUS[$yaPayment->getStatus()])) {
             throw new \Exception('Unexpected payment status',500);
         }
 
         if (
-            Payment::STATUS[$yaPayment->getStatus()] == $payment->status
+            Payment::STATUS[$yaPayment->getStatus()] != $payment->status
         ) {
+            $payment->status = Payment::STATUS[$yaPayment->getStatus()];
+            $payment->save();
+        }
+
+        if ($request->wantsJson() || isset($_COOKIE['z0dd'])) {
             return [
-                'status' => 'not updated',
-                'payment_status' => $payment->status,
+                'status' => $yaPayment->getStatus(),
             ];
         }
 
-        $payment->status = Payment::STATUS[$yaPayment->getStatus()];
-        $payment->save();
-
-        return [
-            'status' => 'updated',
-            'payment_status' => $payment->status,
-        ];
+        return redirect('http://12space.ru');
     }
 }

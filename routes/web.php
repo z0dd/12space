@@ -18,12 +18,16 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+// Веб-хук для обратной связи сендгрида
 Route::any('/webhooks/sendgrid', 'WebhookController@sendgrid');
 
+// Оплата через Яндекс Кассу
 Route::any('/payment', 'PaymentController@payment');
-Route::any('/payment_result/{payment_id}', 'PaymentController@paymentResult');
+Route::any('/payment_result/{return_id}', 'PaymentController@paymentResult');
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 });
 
+//Route::get('/test', 'HomeController@test')->name('test');

@@ -25,7 +25,7 @@ class Payment extends Model
     /**
      * @var array
      */
-    protected $fillable = ['username','phone','email','status','details','yandex_kassa_id'];
+    protected $fillable = ['username','phone','email','status','details','yandex_kassa_id','return_id'];
 
     const STATUS = [
         'error' => 0,

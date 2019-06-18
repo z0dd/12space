@@ -164,17 +164,14 @@ class UserController extends ApiSpaceController
 
     /**
      * @param Request $request
-     * @param int $user_id
-     * @param int $answer_id
+     * @param int     $user_id
+     * @param int     $answer_id
+     *
      * @return null|static
      * @throws ApiException
      */
     public function saveAnswer(\Illuminate\Http\Request $request, int $user_id, int $answer_id)
     {
-        if (isset($_COOKIE['dev'])) {
-            dd(PassedTest::first()->test->lesson->template->sendNotify(User::find($user_id)));
-        }
-
         $answer = Answer::with(['question'])->findOrFail($answer_id);
 
         $passedTest = PassedTest::where('user_id', $user_id)
