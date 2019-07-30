@@ -11,6 +11,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PaymentRequest;
 use App\Payment;
+use function GuzzleHttp\Psr7\build_query;
 use Illuminate\Http\Request;
 use YandexCheckout\Client;
 
@@ -119,6 +120,6 @@ class PaymentController extends Controller
             ];
         }
 
-        return redirect('http://12space.ru');
+        return redirect('http://12space.ru/payment?'.build_query(['return_id'=>$return_id]));
     }
 }
