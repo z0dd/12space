@@ -13,6 +13,15 @@ use Illuminate\Database\Eloquent\Model;
 class UserToCourse extends Model
 {
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'user_id','course_id','status'
+    ];
+
+    /**
      *
      */
     const STATUSES = [

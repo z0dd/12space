@@ -30,4 +30,19 @@ Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 });
 
+// Получение контента по маскированной ссылке
+Route::get('/content/{content_id}/{content_index}', function (int $content_id, int $content_index) {
+
+    $file = \App\LessonContent::where('file_type_id',2)->findOrFail($content_id);
+
+    $files = json_decode($file->file,1);
+
+    if (is_null($files) || empty($files[$content_index]['download_link'])) {
+        abort(404);
+    }
+
+    return Storage::disk('public')->download($files[$content_index]['download_link']);
+
+})->name('content_download')->middleware('auth');
+
 //Route::get('/test', 'HomeController@test')->name('test');

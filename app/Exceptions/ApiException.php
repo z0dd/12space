@@ -3,7 +3,6 @@
 namespace App\Exceptions;
 
 use Exception;
-use Log;
 
 /**
  * Class ApiException
@@ -38,6 +37,6 @@ class ApiException extends Exception
             return response()->json($error, 400);
         }
 
-        return parent::render($request);
+        return $error;
     }
 }

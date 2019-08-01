@@ -5,15 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Answer;
 use App\Exceptions\ApiException;
 use App\Http\Requests\SaveUserRequest;
+use App\Http\Requests\UserRegisterRequest;
 use App\Lesson;
 use App\PassedTest;
-use App\Question;
 use App\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\UserToCourse;
+use App\UserToModule;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Password;
-use SendGrid\Client;
 
 /**
  * Class UserController
@@ -375,5 +377,159 @@ class UserController extends ApiSpaceController
         }
 
         throw new ApiException('Message not sended', 500);
+    }
+
+    /**
+     * @param UserRegisterRequest $request
+     *
+     * @return mixed
+     * @throws ApiException
+     *
+     *
+     * @OA\Post(
+     *      path="/users/register",
+     *      tags={"Users"},
+     *      description="Register new User",
+     *      security={
+     *          {"passport": {}},
+     *      },
+     *      @OA\Parameter(
+     *          description="User's name",
+     *          in="query",
+     *          name="name",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string",
+     *              minimum="3",
+     *              maximum="254"
+     *         )
+     *      ),
+     *      @OA\Parameter(
+     *          description="User's last name",
+     *          in="query",
+     *          name="last_name",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string",
+     *              minimum="3",
+     *              maximum="254"
+     *         )
+     *      ),
+     *      @OA\Parameter(
+     *          description="User's phone",
+     *          in="query",
+     *          name="phone",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string",
+     *              pattern="^((7)+([0-9]){10})$"
+     *         )
+     *      ),
+     *     @OA\Parameter(
+     *          description="User's gender ID",
+     *          in="query",
+     *          name="gender_id",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="integer",
+     *              format="int64",
+     *              minimum="1"
+     *         )
+     *      ),
+     *     @OA\Parameter(
+     *          description="User's account ID",
+     *          in="query",
+     *          name="account_id",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="integer",
+     *              minimum="1"
+     *         )
+     *      ),
+     *     @OA\Parameter(
+     *          description="User's password",
+     *          in="query",
+     *          name="password",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string",
+     *              minimum="6",
+     *              maximum="20",
+     *              format="password"
+     *         )
+     *      ),
+     *     @OA\Parameter(
+     *          description="Password confirmation",
+     *          in="query",
+     *          name="password_confirmation",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string",
+     *              format="password"
+     *         )
+     *      ),
+     *      @OA\Parameter(
+     *          description="User's email",
+     *          in="query",
+     *          name="email",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string",
+     *              format="email",
+     *         )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation"
+     *       ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="invalid request"
+     *       ),
+     *      @OA\Response(
+     *          response=500,
+     *          description="Error while sending message"
+     *       ),
+     * )
+     */
+    public function registerNewUser(UserRegisterRequest $request)
+    {
+        $validated = $request->validated();
+
+        $validated['password'] = Hash::make($validated['password']);
+
+        DB::beginTransaction();
+        try {
+            $user = User::create($validated);
+
+            UserToModule::create([
+                'user_id' => $user->id,
+                'module_id' => 1,
+                'status' => UserToModule::STATUSES['available']
+            ]);
+
+            UserToCourse::create([
+                'user_id' => $user->id,
+                'course_id' => 1,
+                'status' => UserToCourse::STATUSES['available']
+            ]);
+
+            $user = User::WithDefaultRelations()
+                ->with(['courses', 'modules'])
+                ->find($user->id);
+
+            DB::commit();
+        } catch (QueryException $exception) {
+            DB::rollBack();
+            if (strpos('users_email_unique',$exception->getMessage()) !== false) {
+                throw new ApiException('User with this email already registered.', 400);
+            }
+            throw new ApiException('User data wrong.', 500);
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            throw new ApiException('User cannot be register.', 500);
+        }
+
+        return $user;
     }
 }

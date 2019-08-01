@@ -50,7 +50,7 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','last_name','phone'
+        'name', 'email', 'password','last_name','phone','gender_id','account_id',
     ];
 
     /**
@@ -205,6 +205,7 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
 //        $nextLesson->published_at = $lastPassedTest->created_at->addDays(config('settings.days_between_lessons'))->format('Y-m-d H:i:s');
 
         $nextLesson->attachStatus($this)->attachPublish($this);
+
         return $nextLesson;
     }
 

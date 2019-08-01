@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::middleware(['auth:api'/*,'checkApiUserAccess'*/])->group(function () {
+Route::middleware(['auth:api','checkApiUserAccess'])->group(function () {
     Route::get('accounts', 'Api\AccountController@show')->name('getAccounts');
     Route::get('accounts/{id}', 'Api\AccountController@get')->name('getAccount');
 
@@ -55,6 +55,7 @@ Route::middleware(['auth:api'/*,'checkApiUserAccess'*/])->group(function () {
     Route::get('users/{user_id}/lessons', 'Api\UserController@getLessons');
     Route::put('users/{user_id}/answers/{answer_id}', 'Api\UserController@saveAnswer');
     Route::put('users/reset', 'Api\UserController@sendResetLinkEmail');
+    Route::post('users/register', 'Api\UserController@registerNewUser');
 
     Route::get('app/{user_id}/', 'Api\AppController@index');
     Route::get('app/{user_id}/lessons/{lesson_id}', 'Api\AppController@getLesson');

@@ -28,10 +28,17 @@ class CheckApiUserAccess
     {
         $response = $next($request);
 
+        // Если пользователь я, то отдадим мне что я хочу. :D
+        if (false == Auth::guest() && Auth::user()->id == 1) { return $response;}
+
         // Если запрос содержит ID пользователя
         if ($request->route('user_id') !== null) {
+
             // Закрываем доступ ко всем пользователям кроме своего
-            if (Auth::user()->id != $request->route('user_id')) {
+            if (
+                Auth::guest()
+                || Auth::user()->id != $request->route('user_id')
+            ) {
                 throw new ApiException('Access denied', 403);
             }
         }
