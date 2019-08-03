@@ -9,8 +9,11 @@
 2. cp .env.example .env
 3. Fill env params
 4. composer install
-4. php artisan key:generate
-5. php artisan migrate
+5. composer require laravel/passport
+6. php artisan key:generate
+7. php artisan migrate
+8. chmod 777 storage
+9. php artisan storage:link
 
 
 * Api prefix /api
