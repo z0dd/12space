@@ -9,6 +9,7 @@ use App\Http\Requests\UserRegisterRequest;
 use App\Lesson;
 use App\PassedTest;
 use App\User;
+use App\UserHashAuth;
 use App\UserToCourse;
 use App\UserToModule;
 use Illuminate\Database\QueryException;
@@ -368,6 +369,16 @@ class UserController extends ApiSpaceController
 
         switch ($response) {
             case Password::RESET_LINK_SENT:
+                $user = User::whereEmail($credentials['email'])->with('userHash')->first();
+                if (
+                    false == is_null($user) && $user instanceof User
+                ) {
+                    $userHash = UserHashAuth::find($user->id);
+                    if (false == is_null($userHash)) {
+                        $userHash->delete();
+                    }
+                }
+
                 return [
                     "status" => "success",
                     'text'=> "Message sended",

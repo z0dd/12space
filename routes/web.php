@@ -44,5 +44,3 @@ Route::get('/content/{content_id}/{content_index}', function (int $content_id, i
     return Storage::disk('public')->download($files[$content_index]['download_link']);
 
 })->name('content_download')->middleware('auth');
-
-//Route::get('/test', 'HomeController@test')->name('test');

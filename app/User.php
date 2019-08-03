@@ -141,6 +141,14 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function userHash()
+    {
+        return $this->hasOne(UserHashAuth::class);
+    }
+
+    /**
      * @return array
      */
     public function rules() :array
