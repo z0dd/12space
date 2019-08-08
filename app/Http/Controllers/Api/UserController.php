@@ -8,6 +8,7 @@ use App\Http\Requests\SaveUserRequest;
 use App\Http\Requests\UserRegisterRequest;
 use App\Lesson;
 use App\PassedTest;
+use App\Template;
 use App\User;
 use App\UserHashAuth;
 use App\UserToCourse;
@@ -377,6 +378,11 @@ class UserController extends ApiSpaceController
                     if (false == is_null($userHash)) {
                         $userHash->delete();
                     }
+                }
+
+                $template = Template::whereName('ResetPassword')->firstOrFail();
+                if (false === $template->sendNotify($user)) {
+                    throw new ApiException('Message not sended. Sendgrid error', 500);
                 }
 
                 return [
