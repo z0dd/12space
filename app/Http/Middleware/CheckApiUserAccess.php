@@ -31,10 +31,10 @@ class CheckApiUserAccess
     {
         $response = $next($request);
 
-        if ($this->checkUserHash() === false) {
-            throw new ApiException('User multiply devices', 403);
-        } else {
-            if ($request->route()->getName() !== 'apiResetUserPassword') {
+        if ($request->route()->getName() !== 'apiResetUserPassword') {
+            if ($this->checkUserHash() === false) {
+                throw new ApiException('User multiply devices', 403);
+            } else {
                 $response->withCookie(
                     cookie()->forever(
                         self::COOKIE_HASH_NAME,
