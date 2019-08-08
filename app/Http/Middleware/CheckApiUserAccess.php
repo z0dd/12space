@@ -38,7 +38,9 @@ class CheckApiUserAccess
                 $response->withCookie(
                     cookie()->forever(
                         self::COOKIE_HASH_NAME,
-                        Auth::user()->userHash()->first()->hash
+                        Auth::user()->userHash()->first()->hash,
+                        '/',
+                        env('APP_MAIN_DOMAIN','12space.ru')
                     )
                 );
             }
