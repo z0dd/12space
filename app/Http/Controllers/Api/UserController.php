@@ -13,6 +13,7 @@ use App\User;
 use App\UserHashAuth;
 use App\UserToCourse;
 use App\UserToModule;
+use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -324,8 +325,11 @@ class UserController extends ApiSpaceController
 
     /**
      * @param Request $request
+     *
      * @return array
      * @throws ApiException
+     * @throws \SendGrid\Mail\TypeException
+     *
      *
      * @OA\Put(
      *      path="/users/reset",
@@ -380,8 +384,19 @@ class UserController extends ApiSpaceController
                     }
                 }
 
+                $token = app(PasswordBroker::class)->createToken($user);
+
                 $template = Template::whereName('ResetPassword')->firstOrFail();
-                if (false === $template->sendNotify($user)) {
+
+                $email = new \SendGrid\Mail\Mail();
+                $email->setFrom(config('mail.from.address'),config('mail.from.name'));
+                $email->addTo($user->email,$user->full_name);
+                $email->setTemplateId($template->getTemplateId());
+                $email->addContents(['token'=>$token]);
+
+                try {
+                    (new \SendGrid(env('SENDGRID_API_KEY')))->send($email);
+                } catch (Exception $e) {
                     throw new ApiException('Message not sended. Sendgrid error', 500);
                 }
 
