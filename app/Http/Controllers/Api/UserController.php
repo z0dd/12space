@@ -392,7 +392,8 @@ class UserController extends ApiSpaceController
                 $email->setFrom(config('mail.from.address'),config('mail.from.name'));
                 $email->addTo($user->email,$user->full_name);
                 $email->setTemplateId($template->getTemplateId());
-                $email->addContents(['token'=>$token]);
+                $email->addCustomArg('token',$token);
+                $email->addCustomArg('reset_link',route('password.reset',$token));
 
                 try {
                     (new \SendGrid(env('SENDGRID_API_KEY')))->send($email);
