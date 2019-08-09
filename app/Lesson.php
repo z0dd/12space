@@ -258,7 +258,6 @@ class Lesson extends ModelExtender
             } else {
                 $this->published_at = $userModule->created_at->format('Y-m-d H:i:s');
             }
-            $this->published_at = $lastPassedTest->created_at->addDays(config('settings.days_between_lessons'))->format('Y-m-d H:i:s');
 
         } else if ($prevLesson){
             $this->published_at =

@@ -347,6 +347,8 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
 
                 return false;
             });
+
+            $this->lessons = $this->lessons->sortBy('sort_order');
         }
 
         return $this->lessons;
