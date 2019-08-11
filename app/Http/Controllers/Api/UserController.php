@@ -400,6 +400,7 @@ class UserController extends ApiSpaceController
                 $email->addTo($user->email,$user->full_name);
                 $email->setTemplateId($template->getTemplateId());
                 $email->addDynamicTemplateData('recoverLink',route('password.reset',$token));
+                $email->addDynamicTemplateData('token',$token);
 
                 try {
                     $response = (new \SendGrid(env('SENDGRID_API_KEY')))->send($email);
