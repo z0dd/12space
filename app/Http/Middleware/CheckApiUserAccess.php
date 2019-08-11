@@ -47,11 +47,8 @@ class CheckApiUserAccess
             }
         }
 
-        // Если пользователь я, то отдадим мне что я хочу. :D
-        if (false == Auth::guest() && Auth::user()->id == 1) { return $response;}
-
         // Если запрос содержит ID пользователя
-        if ($request->route('user_id') !== null) {
+        if ($request->route('user_id') !== null && $isAdmin == false) {
 
             // Закрываем доступ ко всем пользователям кроме своего
             if (
