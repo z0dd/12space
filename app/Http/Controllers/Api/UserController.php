@@ -173,7 +173,7 @@ class UserController extends ApiSpaceController
      * @param int     $user_id
      * @param int     $answer_id
      *
-     * @return null|static
+     * @return PassedTest
      * @throws ApiException
      */
     public function saveAnswer(\Illuminate\Http\Request $request, int $user_id, int $answer_id)
@@ -201,11 +201,14 @@ class UserController extends ApiSpaceController
             throw new ApiException('Not saved', 500);
         }
 
-        if ($passedTest->test->lesson->template) {
+        $passedTest = $passedTest->fresh(['question','answer','test']);
+
+        // Если пришедший ответ на последний вопрос теста, то отправляем письмо об успешном прохождении
+        if ($passedTest->test->getLastQuestion()->id == $answer->question->id) {
             $passedTest->test->lesson->template->sendNotify(User::find($user_id));
         }
 
-        return $passedTest->fresh(['question','answer','test']);
+        return $passedTest;
     }
 
     /**

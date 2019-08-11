@@ -85,4 +85,16 @@ class Test extends ModelExtender
     {
         return $query->with(['questions.answers']);
     }
+
+    /**
+     * Возвращает последний вопрос теста
+     *
+     * @return Question|null
+     */
+    public function getLastQuestion() :? Question
+    {
+        return $this->questions()
+            ->orderBy('sort_order','DESC')
+            ->first();
+    }
 }
