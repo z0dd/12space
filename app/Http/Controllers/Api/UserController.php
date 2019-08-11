@@ -8,6 +8,7 @@ use App\Http\Requests\SaveUserRequest;
 use App\Http\Requests\UserRegisterRequest;
 use App\Lesson;
 use App\PassedTest;
+use App\SendgridNotification;
 use App\Template;
 use App\User;
 use App\UserHashAuth;
@@ -328,6 +329,7 @@ class UserController extends ApiSpaceController
      *
      * @return array
      * @throws ApiException
+     * @throws \Exception
      * @throws \SendGrid\Mail\TypeException
      *
      *
@@ -396,10 +398,16 @@ class UserController extends ApiSpaceController
                 $email->addCustomArg('reset_link',route('password.reset',$token));
 
                 try {
-                    (new \SendGrid(env('SENDGRID_API_KEY')))->send($email);
+                    $response = (new \SendGrid(env('SENDGRID_API_KEY')))->send($email);
                 } catch (Exception $e) {
                     throw new ApiException('Message not sended. Sendgrid error', 500);
                 }
+
+                if ($response->statusCode() !== 202) {
+                    throw new ApiException('Sendgrid return error', 500);
+                }
+
+                SendgridNotification::processSendGridRespose($response, $template, $user);
 
                 return [
                     "status" => "success",

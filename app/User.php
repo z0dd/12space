@@ -360,6 +360,7 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
     public function getLastPassedTest()
     {
         return PassedTest::where('user_id', $this->id)
+            ->with('test.lesson')
             ->orderBy('id', 'desc')
             ->first();
     }

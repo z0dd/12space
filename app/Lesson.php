@@ -245,28 +245,26 @@ class Lesson extends ModelExtender
      */
     public function attachPublish(User $user)
     {
-        $lastPassedTest = $user->getLastPassedTest();
         $prevLesson = $this->getPrevLessonByUser($user);
-        $test = $this->tests->first();
 
-        // Если пройден только первый тест:
-        if ($test && $lastPassedTest && $lastPassedTest->test_id == $test->id) {
-
-            $userModule = $user->getAttachedUserToModuleByLesson($this);
-            if (is_null($userModule)) {
-                $this->published_at = $user->created_at->format('Y-m-d H:i:s');
+        // Если есть предыдущий урок
+        if ($prevLesson) {
+            $passedTest = $prevLesson->getPassedTestByUser($user);
+            // Если по предшествующему уроку есть пройденный тест,
+            // то дату публикации текущего урока рассчитываем от даты создания того теста
+            if ($passedTest) {
+                $this->published_at = $passedTest->created_at->addDays(config('settings.days_between_lessons'))->format('Y-m-d H:i:s');
             } else {
-                $this->published_at = $userModule->created_at->format('Y-m-d H:i:s');
+                // Если предидущий урок не пройден, то рассчитываем дату публикации этого урока от даты публикации предидущего
+                $this->published_at =
+                    (new Carbon($prevLesson->attachPublish($user)->published_at))
+                        ->addDays(config('settings.days_between_lessons'))
+                        ->format('Y-m-d H:i:s');
             }
-
-        } else if ($prevLesson){
-            $this->published_at =
-                (
-                    new Carbon($prevLesson->attachPublish($user)->published_at)
-                )->addDays(config('settings.days_between_lessons'))->format('Y-m-d H:i:s');
         } else {
+            // Если нет предыдущих уроков, рассчитываем дату публикации от созания пользователя
+            // или связи пользователя с модулем если она есть
             $userModule = $user->getAttachedUserToModuleByLesson($this);
-
             if (is_null($userModule)) {
                 $this->published_at = $user->created_at->format('Y-m-d H:i:s');
             } else {
