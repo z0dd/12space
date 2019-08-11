@@ -440,7 +440,7 @@ class UserController extends ApiSpaceController
      *      @OA\Parameter(
      *          description="Token",
      *          in="query",
-     *          name="email",
+     *          name="token",
      *          required=true,
      *          @OA\Schema(
      *              type="string",
