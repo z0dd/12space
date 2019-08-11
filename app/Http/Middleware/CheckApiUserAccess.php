@@ -32,7 +32,7 @@ class CheckApiUserAccess
         $response = $next($request);
         $isAdmin = Auth::user()->role_id == 1;
 
-        if ($request->route()->getName() !== 'apiResetUserPassword' && $isAdmin == false) {
+        if ($isAdmin == false) {
             if ($this->checkUserHash() === false) {
                 throw new ApiException('User multiply devices', 403);
             } else {

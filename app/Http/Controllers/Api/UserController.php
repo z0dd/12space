@@ -6,8 +6,10 @@ use App\Answer;
 use App\Exceptions\ApiException;
 use App\Http\Requests\SaveUserRequest;
 use App\Http\Requests\UserRegisterRequest;
+use App\Http\Requests\UserResetPasswordRequest;
 use App\Lesson;
 use App\PassedTest;
+use App\PasswordReminder;
 use App\SendgridNotification;
 use App\Template;
 use App\User;
@@ -420,6 +422,94 @@ class UserController extends ApiSpaceController
         }
 
         throw new ApiException('Message not sended', 500);
+    }
+
+    /**
+     * @param UserResetPasswordRequest $request
+     *
+     * @return mixed
+     * @throws ApiException
+     *
+     * @OA\Post(
+     *      path="/users/reset",
+     *      tags={"Users"},
+     *      description="Reset User password",
+     *      security={
+     *          {"passport": {}},
+     *      },
+     *      @OA\Parameter(
+     *          description="Token",
+     *          in="query",
+     *          name="email",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string",
+     *         )
+     *      ),
+     *      @OA\Parameter(
+     *          description="User's email",
+     *          in="query",
+     *          name="email",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string",
+     *              format="email",
+     *         )
+     *      ),
+     *     @OA\Parameter(
+     *          description="User's password",
+     *          in="query",
+     *          name="password",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string",
+     *              minimum="6",
+     *              maximum="20",
+     *              format="password"
+     *         )
+     *      ),
+     *     @OA\Parameter(
+     *          description="Password confirmation",
+     *          in="query",
+     *          name="password_confirmation",
+     *          required=true,
+     *          @OA\Schema(
+     *              type="string",
+     *              format="password"
+     *         )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="successful operation"
+     *       ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="invalid request"
+     *       ),
+     *      @OA\Response(
+     *          response=500,
+     *          description="Error while sending message"
+     *       ),
+     * )
+     */
+    public function resetUserPassword(UserResetPasswordRequest $request)
+    {
+        $validated = $request->validated();
+
+        $remider = PasswordReminder::with('user')->findOrFail($validated['email']);
+
+        if (false == Hash::check($validated['token'],$remider->token)) {
+            throw new ApiException('Wrong token',401);
+        }
+
+        $remider->user->password = bcrypt($validated['password']);
+        try {
+            $remider->user->save();
+        } catch (\Exception $exception) {
+            throw new ApiException('Reset password Error', 500);
+        }
+
+        return $remider->user;
     }
 
     /**

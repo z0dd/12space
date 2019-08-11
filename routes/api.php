@@ -54,7 +54,6 @@ Route::middleware(['auth:api','checkApiUserAccess'])->group(function () {
     Route::get('users/{user_id}/lessons/current', 'Api\UserController@getCurrentLesson');
     Route::get('users/{user_id}/lessons', 'Api\UserController@getLessons');
     Route::put('users/{user_id}/answers/{answer_id}', 'Api\UserController@saveAnswer');
-    Route::put('users/reset', 'Api\UserController@sendResetLinkEmail')->name('apiResetUserPassword');
     Route::post('users/register', 'Api\UserController@registerNewUser');
 
     Route::get('app/{user_id}/', 'Api\AppController@index');
@@ -66,3 +65,6 @@ Route::middleware(['auth:api','checkApiUserAccess'])->group(function () {
     Route::get('app/{user_id}/modules', 'Api\AppController@getModules');
     Route::any('app/logout', 'Api\AppController@logout')->name('apiLogout');
 });
+// Методы для сброса пароля пользователя. Доступны без авторизации
+Route::put('users/reset', 'Api\UserController@sendResetLinkEmail');
+Route::post('users/reset', 'Api\UserController@resetUserPassword');
