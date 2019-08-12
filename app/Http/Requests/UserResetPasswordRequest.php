@@ -36,7 +36,7 @@ class UserResetPasswordRequest extends FormRequest
     public function rules()
     {
         return [
-            'token' => 'required|regex:/[^0-9a-A]/i',
+            'token' => 'required|string',
             'email' => 'required|email|min:3|max:250',
             'password' => 'required|confirmed',
         ];

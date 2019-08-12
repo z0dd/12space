@@ -503,9 +503,10 @@ class UserController extends ApiSpaceController
             throw new ApiException('Wrong token',401);
         }
 
-        $remider->user->password = bcrypt($validated['password']);
+        $user = User::whereEmail($remider->email)->firstOrFail();
+        $user->password = bcrypt($validated['password']);
         try {
-            $remider->user->save();
+            $user->save();
         } catch (\Exception $exception) {
             throw new ApiException('Reset password Error', 500);
         }
