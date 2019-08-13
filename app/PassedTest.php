@@ -126,8 +126,19 @@ class PassedTest extends ModelExtender
     {
         $startDate = $this->created_at->startOfDay();
         $curDate = Carbon::now()->startOfDay();
-        $daysToNextLesson = $this->test->lesson->sort_order >= 0 ? $this->test->lesson->sort_order : config('settings.days_between_lessons');
+        $currentLesson = $this->test->lesson;
+        $nextLesson = $this->nextLesson();
 
-        return $startDate->diffInDays($curDate) >= $daysToNextLesson;
+        // Если следующего урока нет, то этот считай доступен
+        if (false == $nextLesson instanceof Lesson) {
+            return false;
+        }
+
+        $daysToLesson = intval($nextLesson->sort_order) - intval($currentLesson->sort_order);
+        if ($daysToLesson < 0) {
+            $daysToLesson = config('settings.days_between_lessons');
+        }
+
+        return $startDate->diffInDays($curDate) >= $daysToLesson;
     }
 }

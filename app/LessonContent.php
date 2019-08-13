@@ -90,11 +90,10 @@ class LessonContent extends ModelExtender
         if (is_array($files)) {
             foreach ($files as $key => &$file) {
                 if (isset($file['download_link'])) {
-//                    $file = \Storage::url($file['download_link']);
                     $file = route('content_download',[
                         'content_id' => $this->id,
                         'content_index' => $key,
-                    ]);
+                    ], false);
                 }
             }
         }
