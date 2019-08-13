@@ -124,7 +124,10 @@ class PassedTest extends ModelExtender
      */
     public function nextLessonConditionsSuccess() :bool
     {
-        return $this->created_at
-                ->diffInDays(Carbon::now()) >= config('settings.days_between_lessons');
+        $startDate = $this->created_at->startOfDay();
+        $curDate = Carbon::now()->startOfDay();
+        $daysToNextLesson = $this->test->lesson->sort_order >= 0 ? $this->test->lesson->sort_order : config('settings.days_between_lessons');
+
+        return $startDate->diffInDays($curDate) >= $daysToNextLesson;
     }
 }

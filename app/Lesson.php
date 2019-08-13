@@ -245,7 +245,17 @@ class Lesson extends ModelExtender
      */
     public function attachPublish(User $user)
     {
+        $publishDateFormat = 'Y-m-d 00:00';
         $prevLesson = $this->getPrevLessonByUser($user);
+
+        // Рассчет количетва дней между текущим уроком и предыдущим.
+        // Берется разница в значениях sort_order. Если разница меньше 0, то отдается значение по умолчанию (из конфига).
+        // Если предыдущего урока нет, используется 0
+
+        $daysToLesson = intval($this->sort_order) - ( $prevLesson ? intval($prevLesson->sort_order) : 0);
+        if ($daysToLesson < 0) {
+            $daysToLesson = config('settings.days_between_lessons');
+        }
 
         // Если есть предыдущий урок
         if ($prevLesson) {
@@ -253,22 +263,22 @@ class Lesson extends ModelExtender
             // Если по предшествующему уроку есть пройденный тест,
             // то дату публикации текущего урока рассчитываем от даты создания того теста
             if ($passedTest) {
-                $this->published_at = $passedTest->created_at->addDays(config('settings.days_between_lessons'))->format('Y-m-d H:i:s');
+                $this->published_at = $passedTest->created_at->addDays($daysToLesson)->format($publishDateFormat);
             } else {
                 // Если предидущий урок не пройден, то рассчитываем дату публикации этого урока от даты публикации предидущего
                 $this->published_at =
                     (new Carbon($prevLesson->attachPublish($user)->published_at))
-                        ->addDays(config('settings.days_between_lessons'))
-                        ->format('Y-m-d H:i:s');
+                        ->addDays($daysToLesson)
+                        ->format($publishDateFormat);
             }
         } else {
             // Если нет предыдущих уроков, рассчитываем дату публикации от созания пользователя
             // или связи пользователя с модулем если она есть
             $userModule = $user->getAttachedUserToModuleByLesson($this);
             if (is_null($userModule)) {
-                $this->published_at = $user->created_at->format('Y-m-d H:i:s');
+                $this->published_at = $user->created_at->format($publishDateFormat);
             } else {
-                $this->published_at = $userModule->created_at->format('Y-m-d H:i:s');
+                $this->published_at = $userModule->created_at->format($publishDateFormat);
             }
         }
 
@@ -315,11 +325,11 @@ class Lesson extends ModelExtender
                 $q->on('tag_to_lessons.lesson_id','lessons.id')
                     ->where(function ($q) use ($tag) {
                         $q->where('tag_to_lessons.tag_id', $tag->id)
-                        ->orWhereNull('tag_to_lessons.tag_id');
+                            ->orWhereNull('tag_to_lessons.tag_id');
                     });
 
             })
-            ->select('lessons.*');
+                ->select('lessons.*');
         }
 
         return $lesson->first();
