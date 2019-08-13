@@ -64,6 +64,9 @@ Route::middleware(['auth:api','checkApiUserAccess'])->group(function () {
     Route::post('app/{user_id}/stories/{story_contents_id}', 'Api\AppController@saveStory');
     Route::get('app/{user_id}/modules', 'Api\AppController@getModules');
     Route::any('app/logout', 'Api\AppController@logout')->name('apiLogout');
+
+    // Получение контента по маскированной ссылке
+    Route::get('/content/{content_id}/{content_index}', 'Api\LessonContentController@getMaskedContent')->name('content_download');
 });
 // Методы для сброса пароля пользователя. Доступны без авторизации
 Route::put('users/reset', 'Api\UserController@sendResetLinkEmail');
