@@ -11,9 +11,9 @@ namespace App\Http\Middleware;
 use App\Exceptions\ApiException;
 use App\UserHashAuth;
 use Closure;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Class CheckApiUserAccess
@@ -36,14 +36,16 @@ class CheckApiUserAccess
             if ($this->checkUserHash() === false) {
                 throw new ApiException('User multiply devices', 403);
             } else {
-                $response->withCookie(
-                    cookie()->forever(
-                        self::COOKIE_HASH_NAME,
-                        Auth::user()->userHash()->first()->hash,
-                        '/',
-                        env('APP_MAIN_DOMAIN','12space.ru')
-                    )
-                );
+                if (false == $response instanceof StreamedResponse) {
+                    $response->withCookie(
+                        cookie()->forever(
+                            self::COOKIE_HASH_NAME,
+                            Auth::user()->userHash()->first()->hash,
+                            '/',
+                            env('APP_MAIN_DOMAIN','12space.ru')
+                        )
+                    );
+                }
             }
         }
 
