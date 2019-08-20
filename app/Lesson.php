@@ -300,7 +300,12 @@ class Lesson extends ModelExtender
      */
     public function getPassedTestByUser(User $user) :? PassedTest
     {
-        $passedTests = $user->passedTests()->with('test.lesson')->get();
+        $passedTests = $user
+            ->passedTests()
+            ->with('test.lesson')
+            ->orderBy('passed_tests.created_at','DESC')
+            ->get();
+
         foreach ($passedTests as $passedTest) {
             if ($passedTest->test->lesson->id == $this->id) {
                 return $passedTest;

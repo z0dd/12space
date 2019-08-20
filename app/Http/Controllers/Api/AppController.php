@@ -98,7 +98,7 @@ class AppController extends Controller
     public function index(Request $request, int $user_id)
     {
         $user = User::with(['courses.modules.lessons', 'passedTests.test.lesson'])
-               ->findOrFail($user_id);
+            ->findOrFail($user_id);
 
         // Собираем все пройденные уроки в массив для последующего подсчета
         $passedLessons = [];
@@ -356,9 +356,9 @@ class AppController extends Controller
         $storyContent = StoryContent::findOrFail($story_contents_id);
 
         return StoryContentToUser::firstOrCreate([
-                'story_contents_id' => $storyContent->id,
-                'user_id' => $user->id,
-            ]);
+            'story_contents_id' => $storyContent->id,
+            'user_id' => $user->id,
+        ]);
     }
 
     /**

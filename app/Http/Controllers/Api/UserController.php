@@ -222,7 +222,7 @@ class UserController extends ApiSpaceController
     {
         $user = User::findOrFail($user_id);
 
-        return $user->currentLesson();
+        return $user->currentLesson()->attachPublish($user);
     }
 
     /**

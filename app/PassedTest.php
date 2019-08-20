@@ -106,11 +106,12 @@ class PassedTest extends ModelExtender
         $tag = $tags->first();
         $tag = Tag::find($tag['id']);
 
-        if ($tag->lessons->isEmpty()) {
+        $lessons = $tag->lessons()->orderBy('sort_order','ASC')->get();
+        if ($lessons->isEmpty()) {
             return false;
         }
 
-        foreach ($tag->lessons as $lesson) {
+        foreach ($lessons as $lesson) {
             if ($lesson->sort_order > $this->test->lesson->sort_order)
                 return $lesson;
         }

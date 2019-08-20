@@ -210,8 +210,6 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
             throw new ApiException('Ошибка при получении следующего урока');
         }
 
-//        $nextLesson->published_at = $lastPassedTest->created_at->addDays(config('settings.days_between_lessons'))->format('Y-m-d H:i:s');
-
         $nextLesson->attachStatus($this)->attachPublish($this);
 
         return $nextLesson;
@@ -256,7 +254,11 @@ class User extends \TCG\Voyager\Models\User implements ApiModelInterface
                         }
                     }
 
-                    $module->load(['lessons' => function ($q) use ($lessons) {$q->whereIn('lessons.id', $lessons);}]);
+                    $module->load([
+                        'lessons' => function ($q) use ($lessons) {
+                            $q->whereIn('lessons.id', $lessons)->orderBy('sort_order','ASC');
+                        }
+                    ]);
                     foreach ($module->lessons as &$lesson) {
                         $lesson->attachStatus($this)->attachPublish($this);
                     }
